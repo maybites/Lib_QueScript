@@ -1,13 +1,9 @@
-The following describes how to set up a Processing Library project in Eclipse and build it successfully, and to make your Library ready for distribution.
+This is the core Java development part for QueScript. It also serves as the Processing Library Exporter. For MaxMSP users please look here.
 
 ## Import to Eclipse
 
-There are two options to import the template project into Eclipse: using a Git [fork](https://help.github.com/articles/fork-a-repo) or using a downloaded package. If you are not familiar with Git or GitHub, you should opt for the downloaded package.
-
-### Option A: GitHub
-
-1. Fork the template repository to use as a starting point.
-  * Navigate to https://github.com/processing/processing-library-template in your browser.
+1. Fork this repository to use as a starting point.
+  * Navigate to https://github.com/maybites/QueScript in your browser.
   * Click the "Fork" button in the top-right of the page.
   * Once your fork is ready, open the new repository's "Settings" by clicking the link in the menu bar on the right.
   * Change the repository name to the name of your Library and save your changes.
@@ -21,22 +17,10 @@ There are two options to import the template project into Eclipse: using a Git [
   * Select the `master` branch on the next screen, and click "Next >".
   * The default settings on the "Local Configuration" screen should work fine, click "Next >".
   * Make sure "Import existing projects" is selected, and click "Next >".
-  * Eclipse should find and select the `processing-library-template` automatically, click "Finish".
+  * Eclipse should find and select the `Lib_QueScript` automatically, click "Finish".
 1. Rename your Eclipse project.
-  * In the Package Explorer, right-click (ctrl-click) on the folder icon of the `processing-library-template` project, and select Refactor → Rename... from the menu that pops up. 
-  * Give the project the name of your Library, and click "OK".
+  * In the Package Explorer, right-click (ctrl-click) on the folder icon of the `Lib_QueScript` project, and select Refactor → Rename... from the menu that pops up. 
   
-### Option B: Downloaded Package
-
-1. Download the latest Eclipse template from [here](https://github.com/processing/processing-library-template/releases). **Don't unzip the ZIP file yet.**
-1. Create a new Java project in Eclipse. 
-  * From the menubar choose File → New → Java Project. 
-  * Give the project the name of your Library. 
-  * Click "Finish".
-1. Import the template source files.
-  * Right-click (ctrl-click) onto the folder icon of your newly created project in the Package Explorer and select "Import..." from the menu that pops up. 
-  * Select General → Archive File, and click "Next >".
-  * Navigate to the ZIP file you downloaded earlier in step 1, and click "Finish".
 
 ## Set Up and Compile
 
@@ -76,25 +60,3 @@ The `libs` folder is recommended but not a requirement, nevertheless you need to
 
 In case a Library depends on system libraries, put these dependencies next to the `.jar` file. For example, Processing's `opengl.jar` Library depends on JOGL hence the DLLs (for Windows) or jnilibs (for OS X) have to be located next to the `opengl.jar` file.
 
-## What is the difference between JDK and JRE?
-
-JDK stands for Java Development Kit whereas JRE stands for Java Runtime Environment. For developers it is recommended to work with a JDK instead of a JRE since more Java development related applications such as Javadoc are included. Javadoc is a requirement to properly compile and document a Processing Library as described on the guidelines page.
-
-You can have both a JDK and a JRE installed on your system. In Eclipse you need to specify which one you want to use.
-
-## The JRE System Library
-
-This primarily affects Windows and Linux users (because the full JDK is installed by default on Mac OS X). It is recommended that you use the JDK instead of a JRE. The JDK can be downloaded from [Oracle's download site](http://www.oracle.com/technetwork/java/javase/downloads/index.html). Also see the [Java Platform Installation page](http://www.oracle.com/technetwork/java/javase/index-137561.html), which contains useful information.
-
-To change the JRE used to compile your Java project:
-
-1. Open the properties of your project from the menu Project → Properties. Select "Java Build Path" and in its submenu, click on the "Libraries" tab.
-1. A list of JARs and class folders in the build path will show up. In this list you can find the JRE System Library that is used to compile your code. Remove this JRE System library.
-1. Click "Add Library...". In the popup window, choose "JRE System Library" and press "Next".
-1. Select an alternate JRE from the pull-down menu or click and modify the "Installed JREs". Confirm with "Finish" and "OK". 
-
-## Compiling with Ant and javadoc
-
-Ant is a Java-based build tool. For [more information](http://ant.apache.org/faq.html#what-is-ant) visit the [Ant web site](http://ant.apache.org/). Ant uses a file named `build.xml` to store build settings for a project.
-
-Javadoc is an application that creates an HTML-based API documentation of Java code. You can check for its existence by typing `javadoc` on the command line. On Mac OS X, it is installed by default. On Windows and Linux, installing the JDK will also install the Javadoc tool. 
