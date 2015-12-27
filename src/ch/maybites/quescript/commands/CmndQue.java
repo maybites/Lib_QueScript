@@ -2,24 +2,12 @@ package ch.maybites.quescript.commands;
 
 import java.util.ArrayList;
 
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
 
 import com.cycling74.max.Atom;
 
-import ch.maybites.mxj.utils.JitterObjectArray;
-import ch.maybites.quescript.expression.Expression;
-import ch.maybites.quescript.expression.RunTimeEnvironment;
-import ch.maybites.quescript.messages.CMsgShuttle;
-import ch.maybites.quescript.messages.CMsgStop;
-import ch.maybites.quescript.messages.CMsgTime;
-import ch.maybites.quescript.messages.CMsgTrigger;
-import ch.maybites.quescript.messages.ScriptMsgException;
+import ch.maybites.quescript.expression.*;
+import ch.maybites.quescript.messages.*;
 import ch.maybites.tools.Debugger;
 
 public class CmndQue extends Cmnd{

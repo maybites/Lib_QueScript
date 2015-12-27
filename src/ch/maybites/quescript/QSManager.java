@@ -1,8 +1,6 @@
 package ch.maybites.quescript;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -10,24 +8,15 @@ import java.net.URL;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.xml.transform.Result;
 import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
@@ -37,18 +26,13 @@ import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 
-import com.cycling74.jitter.JitterObject;
 import com.cycling74.max.Atom;
 
-import ch.maybites.mxj.utils.JitterObjectArray;
 import ch.maybites.quescript.commands.Cmnd;
 import ch.maybites.quescript.commands.CmndQue;
 import ch.maybites.quescript.commands.CmndScript;
-import ch.maybites.quescript.expression.Expression;
 import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.messages.CMsgTrigger;
 import ch.maybites.quescript.messages.ScriptMsgException;
@@ -74,11 +58,8 @@ public class QSManager{
 	private Document document;
 
 	private Map<String, CmndQue> scriptNodes;
-	private int sceenOffsetVertice;
 	
 	protected String filepath;
-
-	private JitterObjectArray drawable;
 	
 	private ArrayList<CMsgTrigger> triggerQueue;
 	private ArrayList<CMsgTrigger> triggerQueCopy;
