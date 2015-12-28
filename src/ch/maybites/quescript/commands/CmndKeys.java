@@ -84,24 +84,10 @@ public class CmndKeys extends Cmnd {
 		relKeyTimes[relKeyTimes.length - 1] = 1.0f;
 	}
 
-	@Override
-	public void store(Node _parentElement) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void bang(CMsgShuttle _msg) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void bang(CMsgShuttle _msg) {;}
 
 	public void lockLessBang(CMsgShuttle _msg){;}
 
-	@Override
-	public void resume(long _timePassed) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void resume(long _timePassed) {;}
 
 }

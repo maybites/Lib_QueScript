@@ -29,6 +29,7 @@
 
 package ch.maybites.quescript.expression;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -38,40 +39,43 @@ import ch.maybites.quescript.expression.Expression.ExpressionException;
 
 public class RunTimeEnvironment {
 	/**
-	 * Definition of PI as a constant, can be used in expressions as variable.
+	 * Super Storage for all Variables. The individual variables are stored inside 
+	 * HashMaps, their position inside this storage indicates their domain.
 	 */
-
-	/**
-	 * All defined variables with name and value.
-	 */
-	protected Map<String, ExpressionVar> publicVars = new HashMap<String, ExpressionVar>();
-
-	/**
-	 * All defined variables with name and value.
-	 */
-	protected Map<String, ExpressionVar> protectedVars = new HashMap<String, ExpressionVar>();
-
-	/**
-	 * All defined variables with name and value.
-	 */
-	protected Map<String, ExpressionVar> privateVars = new HashMap<String, ExpressionVar>();
-
+	private ArrayList<Map<String, ExpressionVar>> varStore;
+	
 	/**
 	 * All defined operators with name and implementation.
 	 */
-	protected Map<String, Operator> operators = new HashMap<String, Operator>();
+	protected Map<String, Operator> operators;
 
 	/**
 	 * All defined functions with name and implementation.
 	 */
-	protected Map<String, Function> functions = new HashMap<String, Function>();
+	protected Map<String, Function> functions;
 
 	/**
 	 * All defined variables with name and value.
 	 */
-	protected Map<String, ExpressionVar> staticVars = new HashMap<String, ExpressionVar>();
+	protected Map<String, ExpressionVar> staticVars;
+
+	public RunTimeEnvironment(RunTimeEnvironment rt) {
+		operators = rt.operators;
+		functions = rt.functions;
+		staticVars = rt.staticVars;
+		varStore = new ArrayList<Map<String, ExpressionVar>>();
+		for(Map<String, ExpressionVar> m: rt.varStore)
+			varStore.add(m);
+		varStore.add(new HashMap<String, ExpressionVar>());		
+	}
 
 	public RunTimeEnvironment() {
+		varStore = new ArrayList<Map<String, ExpressionVar>>();
+		operators = new HashMap<String, Operator>();
+		functions = new HashMap<String, Function>();
+		staticVars = new HashMap<String, ExpressionVar>();
+		varStore.add(new HashMap<String, ExpressionVar>());
+		
 		addOperator(new Operator("+", 20, true) {
 			@Override
 			public ExpressionVar eval(List<ExpressionVar> parameters) {
@@ -409,63 +413,19 @@ public class RunTimeEnvironment {
 	 */
 	protected Function addFunction(Function function) {
 		return functions.put(function.getName(), function);
+	}	
+
+	/**
+	 * Clears all gobal variables all variables in the highest domain
+	 */
+	public void clearGlobalVariables() {
+		varStore.get(0).clear();
 	}
 
 	/**
-	 * Returns the Map Collection of all the protected variables
-	 * @return
-	 */
-	public Map<String, ExpressionVar> getProtectedVars(){
-		return protectedVars;
-	}
-	
-	/**
-	 * Returns the Map Collection of all the Public variables
-	 * @return
-	 */
-	public Map<String, ExpressionVar> getPublicVars(){
-		return publicVars;
-	}
-	
-	/**
-	 * Returns the Map Collection of all the Public variables
-	 * @return
-	 */
-	public Map<String, ExpressionVar> getPrivateVars(){
-		return privateVars;
-	}
-	
-	/**
-	 * Replaces the Map collection of all the protected Variables with
-	 * @param vars
-	 */
-	public void setProtectedVars(Map<String, ExpressionVar> vars){
-		protectedVars.clear();
-		protectedVars = vars;
-	}
-	
-	/**
-	 * Replaces the Map collection of all the public Variables with
-	 * @param vars
-	 */
-	public void setPublicVars(Map<String, ExpressionVar> vars){
-		publicVars.clear();
-		publicVars = vars;
-	}
-
-	/**
-	 * Replaces the Map collection of all the protected Variables with
-	 * @param vars
-	 */
-	public void setPrivateVars(Map<String, ExpressionVar> vars){
-		privateVars.clear();
-		privateVars = vars;
-	}
-	
-
-	/**
-	 * Sets a public variable value. if no variable of this name has been set, rt will use
-	 * the passed instance as the variable container.
+	 * Sets a global variable value. if no variable of this name has been set inside the top
+	 * domain, it will create one, no matter if another variable of the same name exists in a
+	 * lower domain
 	 * 
 	 * @param variable
 	 *            The variable name.
@@ -473,17 +433,19 @@ public class RunTimeEnvironment {
 	 *            The variable value.
 	 * @return reference to the public variable
 	 */
-	public ExpressionVar setPublicVariable(String variable, ExpressionVar value) {
-		if(publicVars.containsKey(variable)){
-			return publicVars.get(variable).set(value);
+	public ExpressionVar setGlobalVariable(String variable, ExpressionVar value) {
+		if(varStore.get(0).containsKey(variable)){
+			return varStore.get(0).get(variable).set(value);
 		} else {
-			publicVars.put(variable, value.setUsedAsVariable());
+			varStore.get(0).put(variable, value.setUsedAsVariable());
 			return value;
 		}
 	}
 
 	/**
-	 * Sets a public variable value.
+	 * Sets a global variable value. if no variable of this name has been set inside the top
+	 * domain, it will create one, no matter if another variable of the same name exists in a
+	 * lower domain
 	 * 
 	 * @param variable
 	 *            The variable name.
@@ -491,18 +453,20 @@ public class RunTimeEnvironment {
 	 *            The variable value.
 	 * @return reference to the public variable
 	 */
-	public ExpressionVar setPublicVariable(String variable, double value) {
-		if(publicVars.containsKey(variable))
-			return publicVars.get(variable).setValue(value);
-		else {
+	public ExpressionVar setGlobalVariable(String variable, double value) {
+		if(varStore.get(0).containsKey(variable)){
+			return varStore.get(0).get(variable).setValue(value);
+		} else {
 			ExpressionVar v =  new ExpressionVar(value).setUsedAsVariable();
-			publicVars.put(variable, v);
+			varStore.get(0).put(variable, v);
 			return v;
 		}
 	}
 
 	/**
-	 * Sets a public variable value.
+	 * Sets a global variable value. if no variable of this name has been set inside the top
+	 * domain, it will create one, no matter if another variable of the same name exists in a
+	 * lower domain
 	 * 
 	 * @param variable
 	 *            The variable name.
@@ -510,18 +474,19 @@ public class RunTimeEnvironment {
 	 *            The variable value.
 	 * @return reference to the public variable
 	 */
-	public ExpressionVar setPublicVariable(String variable, String value) {
-		if(publicVars.containsKey(variable))
-			return publicVars.get(variable).setValue(value);
-		else {
+	public ExpressionVar setGlobalVariable(String variable, String value) {
+		if(varStore.get(0).containsKey(variable)){
+			return varStore.get(0).get(variable).setValue(value);
+		} else {
 			ExpressionVar v =  new ExpressionVar(value).setUsedAsVariable();
-			publicVars.put(variable, v);
+			varStore.get(0).put(variable, v);
 			return v;
 		}
 	}
 
 	/**
-	 * Sets a protected variable value.
+	 * Sets a variable value. If the variable already exists, it uses the existing one, 
+	 * otherwise it will create a local one (the lowest domain)
 	 * 
 	 * @param variable
 	 *            The variable name.
@@ -529,36 +494,44 @@ public class RunTimeEnvironment {
 	 *            The variable value.
 	 * @return reference to the protected variable
 	 */
-	public ExpressionVar setProtectedVariable(String variable, ExpressionVar value) {
-		if(protectedVars.containsKey(variable)){
-			return protectedVars.get(variable).set(value);
+	public ExpressionVar setVariable(String variable, ExpressionVar value) {
+		ExpressionVar v = getVar(variable);
+		if(v != null){
+			return v.set(value);
 		} else {
-			protectedVars.put(variable, value.setUsedAsVariable());
+			varStore.get(varStore.size() - 1).put(variable, value.setUsedAsVariable());
 			return value;
 		}
 	}
 
 	/**
-	 * Sets a protected variable value.
+	 * Sets a variable value. If the variable already exists, it uses the existing one, 
+	 * otherwise it will create a new own on the specified domain
 	 * 
 	 * @param variable
 	 *            The variable name.
 	 * @param value
 	 *            The variable value.
-	 * @return reference to the protected variable
+	 * @param domain
+	 * 				0 = lowest, 1 = second lowest, etc
+	 * @return reference to the protected variable, null if the domain is incorrect
 	 */
-	public ExpressionVar setProtectedVariable(String variable, double value) {
-		if(protectedVars.containsKey(variable)){
-			return protectedVars.get(variable).setValue(value);
-		}else{
-			ExpressionVar v = new ExpressionVar(value).setUsedAsVariable();
-			protectedVars.put(variable,v);
-			return v;
+	public ExpressionVar setVariable(String variable, ExpressionVar value, int domain) {
+		if(domain < varStore.size()){
+			ExpressionVar v = getVar(variable);
+			if(v != null){
+				return v.set(value);
+			} else {
+				varStore.get(varStore.size() - 1 - domain).put(variable, value.setUsedAsVariable());
+				return value;
+			}
 		}
+		return null;
 	}
 
 	/**
-	 * Sets a protected variable value.
+	 * Sets a variable value. If the variable already exists, it uses the existing one, 
+	 * otherwise it will create a local one (the lowest domain)
 	 * 
 	 * @param variable
 	 *            The variable name.
@@ -566,37 +539,20 @@ public class RunTimeEnvironment {
 	 *            The variable value.
 	 * @return reference to the protected variable
 	 */
-	public ExpressionVar setProtectedVariable(String variable, String value) {
-		if(protectedVars.containsKey(variable)){
-			return protectedVars.get(variable).setValue(value);
-		}else{
-			ExpressionVar v = new ExpressionVar(value).setUsedAsVariable();
-			protectedVars.put(variable,v);
-			return v;
-		}
-	}
-
-
-	/**
-	 * Sets a private variable value.
-	 * 
-	 * @param variable
-	 *            The variable name.
-	 * @param value
-	 *            The variable value.
-	 * @return reference to the protected variable
-	 */
-	public ExpressionVar setPrivateVariable(String variable, ExpressionVar value) {
-		if(privateVars.containsKey(variable)){
-			return privateVars.get(variable).set(value);
+	public ExpressionVar setVariable(String variable, double value) {
+		ExpressionVar v = getVar(variable);
+		if(v != null){
+			return v.setValue(value);
 		} else {
-			privateVars.put(variable, value.setUsedAsVariable());
-			return value;
+			v = new ExpressionVar(value).setUsedAsVariable();
+			varStore.get(varStore.size() - 1).put(variable, v);
+			return v;
 		}
 	}
 
 	/**
-	 * Sets a private variable value.
+	 * Sets a variable value. If the variable already exists, it uses the existing one, 
+	 * otherwise it will create a local one (the lowest domain)
 	 * 
 	 * @param variable
 	 *            The variable name.
@@ -604,33 +560,75 @@ public class RunTimeEnvironment {
 	 *            The variable value.
 	 * @return reference to the protected variable
 	 */
-	public ExpressionVar setPrivateVariable(String variable, double value) {
-		if(privateVars.containsKey(variable)){
-			return privateVars.get(variable).setValue(value);
-		}else{
-			ExpressionVar v = new ExpressionVar(value).setUsedAsVariable();
-			privateVars.put(variable,v);
+	public ExpressionVar setVariable(String variable, String value) {
+		ExpressionVar v = getVar(variable);
+		if(v != null){
+			return v.setValue(value);
+		} else {
+			v = new ExpressionVar(value).setUsedAsVariable();
+			varStore.get(varStore.size() - 1).put(variable, v);
 			return v;
 		}
 	}
+	
+	/**
+	 * Returns the specified variable
+	 * @param variable
+	 * @return null if none of this name exists.
+	 */
+	public ExpressionVar getVar(String variable){
+		for(Map<String, ExpressionVar> m: varStore){
+			for(String var: m.keySet()){
+				if(var.equals(variable))
+					return m.get(var);
+			}
+		}
+		return null;
+	}
 
 	/**
-	 * Sets a private variable value.
-	 * 
+	 * looks for the specified variable
 	 * @param variable
-	 *            The variable name.
-	 * @param value
-	 *            The variable value.
-	 * @return reference to the protected variable
+	 * @return true if one of with this name exists.
 	 */
-	public ExpressionVar setPrivateVariable(String variable, String value) {
-		if(privateVars.containsKey(variable)){
-			return privateVars.get(variable).setValue(value);
-		}else{
-			ExpressionVar v = new ExpressionVar(value).setUsedAsVariable();
-			privateVars.put(variable,v);
-			return v;
+	public boolean containsVar(String variable){
+		for(Map<String, ExpressionVar> m: varStore){
+			for(String var: m.keySet()){
+				if(var.equals(variable))
+					return true;
+			}
 		}
+		return false;
+	}
+
+	/**
+	 * looks if the specified variable exists inside the global domain (the highest level)
+	 * @param variable
+	 * @return
+	 */
+	public boolean containsGlobalVar(String variable){
+		for(String var: varStore.get(0).keySet()){
+			if(var.equals(variable))
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Tells how many domain levels exist iniside this rt
+	 * @return
+	 */
+	public int getDomainLevels(){
+		return varStore.size();
+	}
+	
+	/**
+	 * Returns the specified domain level
+	 * @param level
+	 * @return
+	 */
+	public Map<String, ExpressionVar> getDomain(int level){
+		return varStore.get(level);
 	}
 
 	/**

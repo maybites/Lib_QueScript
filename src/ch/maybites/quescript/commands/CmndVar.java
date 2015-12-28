@@ -10,12 +10,17 @@ import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.ScriptMsgException;
 import ch.maybites.tools.Debugger;
 
-public class CmndExpr extends Cmnd {
-	protected static String NODE_NAME = "expr";
+public class CmndVar extends Cmnd {
+	protected static String NODE_NAME = "var";
 
-	ExpressionVar variable;
+	private static String ATTR_NAME = "name";
 
-	public CmndExpr(Cmnd _parentNode){
+	ExpressionVar varValue;
+	String name;
+	
+	RunTimeEnvironment prt;
+
+	public CmndVar(Cmnd _parentNode){
 		super(_parentNode);
 		super.setCmndName(NODE_NAME);
 	}
@@ -28,11 +33,19 @@ public class CmndExpr extends Cmnd {
 	 * Parse the Expressions with the RuntimeEnvironement
 	 */
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
+		prt = rt;
 		try {
-			variable = new Expression(super.content, "{", "}").setInfo(" at line(" + lineNumber + ")").parse(rt);
+			varValue = new Expression(super.content, "{", "}").setInfo(" at line(" + lineNumber + ")").parse(rt);
 		} catch (ExpressionException e) {
 			throw new ScriptMsgException("QueScript - Command <expr>: Value Expression: " + e.getMessage());
 		}
+		
+		name = getAttributeValue(ATTR_NAME);
+
+		// if no global variable of this name exists, create one with value NULL
+		if(!rt.containsGlobalVar(name))
+			rt.setGlobalVariable(name, new ExpressionVar());
+
 		if(debugMode)
 			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+"created expr-Comnd = "+ super.content);	
 
@@ -46,7 +59,7 @@ public class CmndExpr extends Cmnd {
 	
 	public void lockLessBang(CMsgShuttle _msg){
 		try {
-			variable.eval();
+			prt.setGlobalVariable(name, varValue.eval());
 		} catch (ExpressionException e) {
 			Debugger.error("QueScript que("+parentNode.getQueName()+") - Command <expr>: Value Expression", e.getMessage());
 		}

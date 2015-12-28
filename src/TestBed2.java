@@ -35,11 +35,11 @@ public class TestBed2 {
 			ExpressionVar b = new ExpressionVar("test");
 			ExpressionVar f = new ExpressionVar(4);
 
-			rt.setPublicVariable("a2",a2);
+			rt.setVariable("a2",a2);
 
-			rt.setProtectedVariable("a.1",a);
-			rt.setProtectedVariable("b",b);
-			rt.setProtectedVariable("f",f);
+			rt.setVariable("a.1",a);
+			rt.setVariable("b",b);
+			rt.setVariable("f",f);
 			
 			expression = new Expression("??a2 = sqrt((a.1 == b) * 4)");
 			result = expression.parse(rt);

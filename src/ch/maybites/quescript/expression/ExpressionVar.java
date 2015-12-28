@@ -81,7 +81,7 @@ public class ExpressionVar {
 	
 	/**
 	 * Creates an ExpressionVar with an Evaluation Tree 
-	 * @param value
+	 * @param varValue
 	 */
 	protected ExpressionVar(Operation op, ArrayList<ExpressionVar> p){
 		operation = op;

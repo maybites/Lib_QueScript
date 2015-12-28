@@ -22,16 +22,13 @@ public class CmndQue extends Cmnd{
 	
 	public boolean isPlaying = false;
 
-	RunTimeEnvironment localExprEnvironment;
+	RunTimeEnvironment prt;
 
 	CMsgTime pauseTime;
 		
 	protected CmndQue(Cmnd _parentNode){
 		super(_parentNode);
-		super.setCmndName(NODE_NAME);
-		
-    	localExprEnvironment = new RunTimeEnvironment();
-    	
+		super.setCmndName(NODE_NAME);  	
   	}
 	
 	public void build(Node _xmlNode) throws ScriptMsgException{
@@ -41,7 +38,7 @@ public class CmndQue extends Cmnd{
 		
 		queName = getAttributeValue(ATTR_NAME);
 		
-		executionShuttle = new CMsgShuttle(localExprEnvironment);
+		executionShuttle = new CMsgShuttle();
 	}
 	
 	/**
@@ -49,13 +46,13 @@ public class CmndQue extends Cmnd{
 	 * local Expression-runtime-environment
 	 */
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
+		prt = new RunTimeEnvironment(rt);
 		if(debugMode)
 			Debugger.verbose("QueScript - NodeFactory", "... created Que:" + queName + " at " + lineNumber);	
 
-		localExprEnvironment.setPublicVars(rt.getPublicVars());
-		localExprEnvironment.setProtectedVariable("$TIMER", 0);
+		prt.setVariable("$TIMER", 0);
 		for(Cmnd child: this.getChildren()){
-			child.setup(localExprEnvironment);
+			child.setup(prt);
 		}
 	}
 	
@@ -96,7 +93,7 @@ public class CmndQue extends Cmnd{
 	
 	public void resume(){
 		if(!isPlaying && !executionShuttle.isOff()){
-			executionShuttle.frameBang(localExprEnvironment);
+			executionShuttle.frameBang(prt);
 
 			// calculate the time passed during the pause 
 			long resumeTime = executionShuttle.getFrameTime().getTotalMillis() - pauseTime.getTotalMillis();
@@ -154,7 +151,7 @@ public class CmndQue extends Cmnd{
 				for(CMsgTrigger trgger: _triggerQueue)
 					executionShuttle.addMessage(trgger);
 
-				executionShuttle.frameBang(localExprEnvironment);
+				executionShuttle.frameBang(prt);
 				bang(executionShuttle);
 				// if the que is over and no looping is set, shutdown this que
 				if(!executionShuttle.isWaitLocked() && !isLooping){
@@ -164,7 +161,7 @@ public class CmndQue extends Cmnd{
 				}
 			}  else if(executionShuttle.isInShutDownMode()){
 				// the create the frame Timer
-				executionShuttle.frameBang(localExprEnvironment);
+				executionShuttle.frameBang(prt);
 				bang(executionShuttle);
 				if(!executionShuttle.hasNodesInShutDown()){
 					if(executionShuttle.isDebugging())

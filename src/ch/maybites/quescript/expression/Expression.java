@@ -633,28 +633,12 @@ public class Expression {
 				stack.add(new ExpressionVar(token));
 			} else if (rt.staticVars.containsKey(token)) {
 				stack.push(rt.staticVars.get(token));
-			} else if (rt.privateVars.containsKey(token)) {
-				stack.push(rt.privateVars.get(token));
-			} else if(domainToken == 2){
-				// the variable doesnt exist in the private domain, but the assignment 
-				// wants it inside this domain, then it shall be created
-				ExpressionVar newvar = new ExpressionVar();
-				rt.setPrivateVariable(token, newvar);				
-				stack.add(newvar);
-			} else if (rt.protectedVars.containsKey(token)) {
-				stack.push(rt.protectedVars.get(token));
-			} else if(domainToken == 1){
-				// the variable doesnt exist in the protected domain, but the assignment 
-				// wants it inside this domain, then it shall be created
-				ExpressionVar newvar = new ExpressionVar();
-				rt.setProtectedVariable(token, newvar);				
-				stack.add(newvar);
-			} else if (rt.publicVars.containsKey(token)) {
-				stack.push(rt.publicVars.get(token));
+			} else if (rt.containsVar(token)) {
+				stack.push(rt.getVar(token));
 			} else {
 				// its variable that has not been definied yet.
 				ExpressionVar newvar = new ExpressionVar();
-				rt.setPublicVariable(token, newvar);					
+				rt.setVariable(token, newvar);					
 				stack.add(newvar);
 			}
 		}

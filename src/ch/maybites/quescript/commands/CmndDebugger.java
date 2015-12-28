@@ -15,12 +15,12 @@ public class CmndDebugger extends Cmnd {
 	protected static String NODE_NAME = "debugger";
 
 	private static String ATTR_SHOWVARDOMAIN = "vardomain";
+	private static String ATTR_NAME = "name";
 
 	RunTimeEnvironment prt;
 	
-	boolean showLocal = false;
-	boolean showQue = false;
-	boolean showGlobal = false;
+	private int showVarDomain = 0;
+	private String name = "";
 
 	public CmndDebugger(Cmnd _parentNode){
 		super(_parentNode);
@@ -38,13 +38,16 @@ public class CmndDebugger extends Cmnd {
 		prt = rt;
 
 		if(getAttributeValue(ATTR_SHOWVARDOMAIN) != null){
-			String domains = getAttributeValue(ATTR_SHOWVARDOMAIN);
-			if(domains.contains("local"))
-				showLocal = true;
-			if(domains.contains("que"))
-				showQue = true;
-			if(domains.contains("global"))
-				showGlobal = true;
+			try{
+				showVarDomain = Integer.parseInt(getAttributeValue(ATTR_SHOWVARDOMAIN));
+			} catch (NumberFormatException e){
+				new ScriptMsgException("<que name=\""+parentNode.getQueName()+"\"> <debugger>: attribute '" + ATTR_SHOWVARDOMAIN + "' must be an integer, but instead it is " + getAttributeValue(ATTR_SHOWVARDOMAIN) + " at line(" + lineNumber +" )");
+			}
+		}
+		if(getAttributeValue(ATTR_NAME) != null){
+			name = getAttributeValue(ATTR_NAME);
+		} else {
+			name = "que(" + this.getQueName()+ ") inside " + parentNode.cmdName + " at line(" + lineNumber +")";
 		}
 
 		if(debugMode)
@@ -65,52 +68,27 @@ public class CmndDebugger extends Cmnd {
 
 	public void lockLessBang(CMsgShuttle _msg){
 		if(debugMode){
-			HashMap<String, ExpressionVar> locals = (HashMap<String, ExpressionVar>) prt.getPrivateVars();
-			HashMap<String, ExpressionVar> que = (HashMap<String, ExpressionVar>) prt.getProtectedVars();
-			HashMap<String, ExpressionVar> global = (HashMap<String, ExpressionVar>) prt.getPublicVars();
 			String var;
 			ExpressionVar exVar;
 			Iterator<String> it;
-			if(showLocal || showQue || showGlobal){
-				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("DEBUGGER").done());
-				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("------------------").done());
-
-			} else {
-				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("QueScript: <debugger> usage:").done());
-				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("<debugger " + ATTR_SHOWVARDOMAIN + "=\"local, que, global\" />").done());
-			}
+			getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("DEBUGGER " + name).done());
+			getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("------------------").done());
 				
-			if(showLocal){
-				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("Local Variables:").done());
-				it = locals.keySet().iterator();
-				while(it.hasNext()){
-					var = it.next();
-					exVar = locals.get(var);
-					getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add(var).add(" = ").add(exVar.getStringValue()).add(" (" + ((exVar.isNumber)?"float":"string") + ")").done());
+			int levels = prt.getDomainLevels();
+			int currnt;
+			for(int i = (levels - 1); i >= 0; i--){	
+				currnt = levels  - 1 - i;
+				if(showVarDomain >= currnt){
+					HashMap<String, ExpressionVar> global = (HashMap<String, ExpressionVar>) prt.getDomain(i);
+					getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("Variables inside Domain:").add(currnt).done());
+					it = global.keySet().iterator();
+					while(it.hasNext()){
+						var = it.next();
+						exVar = global.get(var);
+						getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add(var).add(" = ").add(exVar.getStringValue()).add(" (" + ((exVar.isNumber)?"float":"string") + ")").done());
+					}
+					getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("------------------").done());
 				}
-				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("------------------").done());
-			}
-						
-			if(showQue){
-				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("Que Variables:").done());
-				it = que.keySet().iterator();
-				while(it.hasNext()){
-					var = it.next();
-					exVar = que.get(var);
-					getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add(var).add(" = ").add(exVar.getStringValue()).add(" (" + ((exVar.isNumber)?"float":"string") + ")").done());
-				}
-				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("------------------").done());
-			}
-
-			if(showGlobal){
-				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("Global Variables:").done());
-				it = global.keySet().iterator();
-				while(it.hasNext()){
-					var = it.next();
-					exVar = global.get(var);
-					getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add(var).add(" = ").add(exVar.getStringValue()).add(" (" + ((exVar.isNumber)?"float":"string") + ")").done());
-				}
-				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("------------------").done());
 			}
 		}		
 	}

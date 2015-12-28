@@ -51,17 +51,14 @@ public class CmndAnim extends Cmnd {
 	boolean palindromDirection = false;
 			
 	ArrayList<CmndTrack> valueInterolators;
-	ArrayList<Cmnd> sendCommands;
 	
 	double[] relKeyTiming = null;
 	
-	RunTimeEnvironment privateExprEnvironment;
+	RunTimeEnvironment prt;
 
 	public CmndAnim(Cmnd _parentNode){
 		super(_parentNode);
 		super.setCmndName(NODE_NAME);
-		
-    	privateExprEnvironment = new RunTimeEnvironment();
 	}
 
 	public void build(Node _xmlNode) throws ScriptMsgException{
@@ -81,20 +78,18 @@ public class CmndAnim extends Cmnd {
 	 * Parse the Expressions with the RuntimeEnvironement
 	 */
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{		
+    	prt = new RunTimeEnvironment(rt);
 		if(debugMode)
 			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created Anim Comnd: name='" + name +"'");	
-
-		privateExprEnvironment.setPublicVars(rt.getPublicVars());
-		privateExprEnvironment.setProtectedVars(rt.getProtectedVars());
 
 		// first the attribute values
 		String expr = "notset";
 		try {
 			expr = getAttributeValue(ATTR_DURATION);
-			durationTime = getAttributeTime(expr, " at line(" + lineNumber + ")",privateExprEnvironment);
+			durationTime = getAttributeTime(expr, " at line(" + lineNumber + ")",prt);
 			if(hasAttributeValue(ATTR_FADEOUT)){
 				expr = getAttributeValue(ATTR_FADEOUT);
-				fadeoutTime = getAttributeTime(expr, " at line(" + lineNumber + ")",privateExprEnvironment);
+				fadeoutTime = getAttributeTime(expr, " at line(" + lineNumber + ")",prt);
 				// a fadeout time of zero is causing troubles with the algorithm:
 				// better set it to very short.
 				if(fadeoutTime.getTotalMillis()==0){
@@ -123,8 +118,8 @@ public class CmndAnim extends Cmnd {
 		for(Cmnd child: this.getChildren()){
 			if(child.isCmndName(CmndTrack.NODE_NAME)){
 				CmndTrack flt = (CmndTrack)child;
-				privateExprEnvironment.setProtectedVariable(name+"."+flt.trackName, flt.getValueObject());
-				privateExprEnvironment.setPrivateVariable(flt.trackName, flt.getValueObject());
+				prt.setVariable(name+"."+flt.trackName, flt.getValueObject(), 1);
+				prt.setVariable(flt.trackName, flt.getValueObject());
 				valueInterolators.add(flt);
 				if(relKeyTiming != null)
 					flt.setKeyTimes(relKeyTiming);
@@ -134,21 +129,9 @@ public class CmndAnim extends Cmnd {
 		
 		// Make sure the que- and local- variables are created before the children are parsed
 		for(Cmnd child: this.getChildren()){
-			child.setup(privateExprEnvironment);
+			child.setup(prt);
 		}
 
-		sendCommands = new ArrayList<Cmnd>();
-		
-		for(Cmnd child: this.getChildren()){
-			if(child.isCmndName(CmndMessage.NODE_NAME_OUT) ||
-					child.isCmndName(CmndMessage.NODE_NAME_PRINT) ||
-					child.isCmndName(CmndMessage.NODE_NAME_SEND) ||
-					child.isCmndName(CmndMessage.NODE_NAME_TRIGGER)||
-					child.isCmndName(CmndIf.NODE_NAME)||
-					child.isCmndName(CmndExpr.NODE_NAME)){
-				sendCommands.add(child);
-			}
-		}
 	}
 	
 	@Override
@@ -278,7 +261,7 @@ public class CmndAnim extends Cmnd {
 		while(e.hasNext())
 			e.next().calculate(_normalizedTime);
 		
-		for(Cmnd snd: sendCommands)
+		for(Cmnd snd: getChildren())
 			snd.lockLessBang(_msg);		
 	}
 	

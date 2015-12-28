@@ -75,9 +75,15 @@
 	</xs:complexType>
 </xs:element>
 
+<xs:element name="var">
+	<xs:complexType>
+		<xs:attribute ref="name" use="required"/> 
+	</xs:complexType>
+</xs:element>
 
 <xs:element name="debugger">
 	<xs:complexType>
+		<xs:attribute ref="name"/> 
 		<xs:attribute ref="vardomain"/> 
 	</xs:complexType>
 </xs:element>
@@ -160,6 +166,7 @@
 				<xs:element ref="out"/>
 				<xs:element ref="send"/>
 				<xs:element ref="trigger"/>
+				<xs:element ref="var"/>
 				<xs:element ref="expr"/>
 				<xs:element ref="debugger"/>
       			<xs:element ref="fade"/>
@@ -182,6 +189,7 @@
 			<xs:element ref="send"/>
 			<xs:element ref="osc"/>
 			<xs:element ref="trigger"/>
+			<xs:element ref="var"/>
 			<xs:element ref="expr"/>
 			<xs:element ref="anim"/>
 			<xs:element ref="while"/>
@@ -208,6 +216,7 @@
 			<xs:element ref="send"/>
 			<xs:element ref="osc"/>
 			<xs:element ref="trigger"/>
+			<xs:element ref="var"/>
 			<xs:element ref="expr"/>
 			<xs:element ref="debugger"/>
       		<xs:element ref="fade"/>
@@ -235,6 +244,7 @@
 				<xs:element ref="send"/>
 				<xs:element ref="osc"/>
 				<xs:element ref="trigger"/>
+				<xs:element ref="var"/>
 				<xs:element ref="expr"/>
 				<xs:element ref="if"/>
 				<xs:element ref="debugger"/>
@@ -264,6 +274,7 @@
      		<xs:element ref="play"/>
     		<xs:element ref="pause"/>
    			<xs:element ref="resume"/>
+			<xs:element ref="var"/>
   			<xs:element ref="expr"/>
   			<xs:element ref="if"/>
   			<xs:element ref="while"/>

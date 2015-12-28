@@ -30,11 +30,8 @@ public class CMsgShuttle {
 	
 	boolean debugMode = false;
 
-	RunTimeEnvironment queExprEnvironment;
-
-	public CMsgShuttle(RunTimeEnvironment rt){
+	public CMsgShuttle(){
 		msgs = new ArrayList<CMsgInterface>();
-		queExprEnvironment = rt;
 	}
 			
 	/**
@@ -81,7 +78,7 @@ public class CMsgShuttle {
 		frameTime = new CMsgTime(md);
 		nodesInShutdown = 0;
 		if(hasTimer()){
-			queExprEnvironment.setProtectedVariable("$TIMER", frameTime.getTotalMillis() - timerTime.getTotalMillis());
+			rt.setVariable("$TIMER", frameTime.getTotalMillis() - timerTime.getTotalMillis());
 		}
 	}
 	

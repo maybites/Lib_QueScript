@@ -22,6 +22,8 @@ public class CmndIf extends Cmnd {
 	private int mode = -1;
 		
 	private ExpressionVar ifCondition = null;
+	
+	private RunTimeEnvironment prt;
 
 	public CmndIf(Cmnd _parentNode){
 		super(_parentNode);
@@ -50,16 +52,17 @@ public class CmndIf extends Cmnd {
 	 * Parse the Expressions with the RuntimeEnvironement
 	 */
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
+		prt = new RunTimeEnvironment(rt);
 		String smode = "";
 		if(getAttributes().size() == 1){
 			smode = getAttributes().iterator().next();
 			try {
 				if(smode.equals(ATTR_TRUE)){
 					mode = MODE_TRUE;
-					ifCondition = new Expression(getAttributeValue(ATTR_TRUE), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(rt);
+					ifCondition = new Expression(getAttributeValue(ATTR_TRUE), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(prt);
 				} else if(smode.equals(ATTR_FALSE)){
 					mode = MODE_FALSE;
-					ifCondition = new Expression(getAttributeValue(ATTR_FALSE), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(rt);
+					ifCondition = new Expression(getAttributeValue(ATTR_FALSE), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(prt);
 				}
 			} catch (ExpressionException e) {
 				throw new ScriptMsgException("Command <if>: Attribute Expression: " + e.getMessage());
@@ -74,7 +77,7 @@ public class CmndIf extends Cmnd {
 
 		// Make sure the que- and local- variables are created before the children are parsed
 		for(Cmnd child: this.getChildren()){
-			child.setup(rt);
+			child.setup(prt);
 		}
 	}
 	

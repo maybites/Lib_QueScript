@@ -111,10 +111,10 @@ public class QSManager implements OutputInterface{
 		// and then keep on going
 
 		Calendar md = Calendar.getInstance();
-		globalExprEnvironment.setPublicVariable("$HOUR", md.get(Calendar.HOUR_OF_DAY));
-		globalExprEnvironment.setPublicVariable("$MIN", md.get(Calendar.MINUTE));
-		globalExprEnvironment.setPublicVariable("$SEC", md.get(Calendar.SECOND));
-		globalExprEnvironment.setPublicVariable("$MILLI", md.get(Calendar.MILLISECOND));
+		globalExprEnvironment.setGlobalVariable("$HOUR", md.get(Calendar.HOUR_OF_DAY));
+		globalExprEnvironment.setGlobalVariable("$MIN", md.get(Calendar.MINUTE));
+		globalExprEnvironment.setGlobalVariable("$SEC", md.get(Calendar.SECOND));
+		globalExprEnvironment.setGlobalVariable("$MILLI", md.get(Calendar.MILLISECOND));
 
 		// all the que's receive a bang message, since some of them might still be in shutdown mode
 		CmndQue nextElement;
@@ -264,15 +264,15 @@ public class QSManager implements OutputInterface{
 	}
 
 	public void var(String name, double value){
-		globalExprEnvironment.setPublicVariable(name, value);
+		globalExprEnvironment.setGlobalVariable(name, value);
 	}
 	
 	public void var(String name, String value){
-		globalExprEnvironment.setPublicVariable(name, value);
+		globalExprEnvironment.setGlobalVariable(name, value);
 	}
 	
 	public void clearGlobalVars(){
-		globalExprEnvironment.getPublicVars().clear();
+		globalExprEnvironment.clearGlobalVariables();
 	}
 	
 	public void reset(){

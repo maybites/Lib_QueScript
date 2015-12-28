@@ -53,10 +53,7 @@ public class CmndWhile extends Cmnd {
 	 * Parse the Expressions with the RuntimeEnvironement
 	 */
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
-		RunTimeEnvironment prt = new RunTimeEnvironment();
-
-		prt.setPublicVars(rt.getPublicVars());
-		prt.setProtectedVars(rt.getProtectedVars());
+		RunTimeEnvironment prt = new RunTimeEnvironment(rt);
 
 		try {
 			if(getAttributeValue(ATTR_START) != null){
