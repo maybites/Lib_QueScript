@@ -1,7 +1,10 @@
 /*
- * Copyright 2015 Martin Fröhlich
+ * Copyright 2015/2016 Martin Fröhlich
+ * Copyright 2012/2015 Udo Klimaschewski
  * 
  * http://maybites.ch
+ * http://UdoJava.com/
+ * http://about.me/udo.klimaschewski
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the

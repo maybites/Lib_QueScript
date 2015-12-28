@@ -125,30 +125,6 @@
 	</xs:complexType>
 </xs:element>
 
-<xs:element name="f1">
-	<xs:complexType mixed="true">
-		<xs:attribute ref="fadeto"/> 
-	</xs:complexType>
-</xs:element>
-
-<xs:element name="f2">
-	<xs:complexType mixed="true">
-		<xs:attribute ref="fadeto"/> 
-	</xs:complexType>
-</xs:element>
-
-<xs:element name="f3">
-	<xs:complexType mixed="true">
-		<xs:attribute ref="fadeto"/> 
-	</xs:complexType>
-</xs:element>
-
-<xs:element name="f4">
-	<xs:complexType mixed="true">
-		<xs:attribute ref="fadeto"/> 
-	</xs:complexType>
-</xs:element>
-
 <xs:element name="wait">
 	<xs:complexType mixed="true">
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -167,44 +143,10 @@
 	</xs:complexType>
 </xs:element>
 
-<xs:element name="break">
-	<xs:complexType mixed="true">
-	 	<xs:attribute ref="name" use="required"/> 
-		<xs:attribute ref="timer"/> 
-		<xs:attribute ref="watch"/> 
-		<xs:attribute ref="hourglass"/> 
-		<xs:attribute ref="trigger"/> 
-		<xs:attribute ref="countdown"/> 
-		<xs:attribute ref="ramp"/> 
-	</xs:complexType>
-</xs:element>
-
 <xs:element name="fade">
 	<xs:complexType>
 		<xs:attribute ref="name"/> 
 		<xs:attribute ref="fadeout"/> 
-	</xs:complexType>
-</xs:element>
-
-<xs:element name="ramp">
-	<xs:complexType mixed="true">
-		<xs:sequence>
-			<xs:element ref="keys" minOccurs="0" maxOccurs="1"/>
-			<xs:element ref="f1" minOccurs="0" maxOccurs="1"/>
-			<xs:element ref="f2" minOccurs="0" maxOccurs="1"/>
-			<xs:element ref="f3" minOccurs="0" maxOccurs="1"/>
-			<xs:element ref="f4" minOccurs="0" maxOccurs="1"/>
-			<xs:choice minOccurs="0" maxOccurs="unbounded">
-				<xs:element ref="print"/>
-				<xs:element ref="out"/>
-				<xs:element ref="send"/>
-				<xs:element ref="trigger"/>
-			</xs:choice>
-		</xs:sequence>
-	 	<xs:attribute ref="loop" use="required"/> 
-	 	<xs:attribute ref="duration" use="required"/> 
-	 	<xs:attribute ref="fadeout"/> 
-	 	<xs:attribute ref="name" use="required"/> 
 	</xs:complexType>
 </xs:element>
 
@@ -315,7 +257,6 @@
 			<xs:element ref="trigger"/>
       		<xs:element ref="wait"/>
       		<xs:element ref="anim"/>
-      		<xs:element ref="ramp"/>
       		<xs:element ref="timer"/>
       		<xs:element ref="fade"/>
       		<xs:element ref="stop"/>

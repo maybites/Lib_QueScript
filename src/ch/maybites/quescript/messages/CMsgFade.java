@@ -1,13 +1,5 @@
 package ch.maybites.quescript.messages;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Timer;
-
-import com.cycling74.max.Atom;
-
-import ch.maybites.quescript.expression.ExpressionVar;
 import ch.maybites.tools.Debugger;
 
 public class CMsgFade implements CMsgInterface{

@@ -3,7 +3,6 @@ package ch.maybites.quescript.commands;
 import org.w3c.dom.Node;
 
 import ch.maybites.quescript.expression.RunTimeEnvironment;
-import ch.maybites.quescript.messages.CMsgFade;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.ScriptMsgException;
 import ch.maybites.tools.Debugger;
@@ -37,7 +36,7 @@ public class CmndInternal extends Cmnd {
 	 * Parse the Expressions with the RuntimeEnvironement
 	 */
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
-		if(getDebugMode())
+		if(debugMode)
 			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created internal "+ cmdName +"-Comnd for: " + name);	
 	}
 
@@ -56,8 +55,8 @@ public class CmndInternal extends Cmnd {
 
 	public void lockLessBang(CMsgShuttle _msg){
 		if(!_msg.isInStopMode()){
-			this.getOutput().outputSelfCommand(new String[]{cmdName, parentNode.getQueName(), name});
-			if(getDebugMode())
+			this.getOutput().selfCommand(new String[]{cmdName, parentNode.getQueName(), name});
+			if(debugMode)
 				Debugger.verbose("QueScript "+cmdName+"-Command que:(" + parentNode.getQueName() + ")", "sent "+cmdName+"-message to "+cmdName+": " + name);
 		}
 	}

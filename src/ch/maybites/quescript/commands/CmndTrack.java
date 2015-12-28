@@ -1,14 +1,11 @@
 package ch.maybites.quescript.commands;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.w3c.dom.Node;
-
-import com.cycling74.max.Atom;
 
 import ch.maybites.quescript.expression.Expression;
 import ch.maybites.quescript.expression.ExpressionVar;
@@ -70,7 +67,7 @@ public class CmndTrack extends Cmnd {
 
 		for(int i = 0; i < segmts.size(); i++){
 			try{
-				keyValues[i] = new Expression(segmts.get(i)).parse(rt);
+				keyValues[i] = new Expression(segmts.get(i)).setInfo(" at line(" + lineNumber + ")").parse(rt);
 				if(setupRelKeyTimes)
 					relKeyTimes[i] = i * 1. / (double)(segmts.size() - 1);
 			} catch (ExpressionException e) {
@@ -92,7 +89,7 @@ public class CmndTrack extends Cmnd {
 		else
 			fadeTo = keyValues[0];
 
-		if(getDebugMode())
+		if(debugMode)
 			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created track-Comnd: name='" + trackName + "' | " + super.content);	
 
 		// and then do it for all the children

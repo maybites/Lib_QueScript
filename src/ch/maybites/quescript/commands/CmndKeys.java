@@ -37,7 +37,7 @@ public class CmndKeys extends Cmnd {
 		
 		parse(super.content);		
 
-		if(getDebugMode())
+		if(debugMode)
 			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created keys Comnd");			
 	}
 

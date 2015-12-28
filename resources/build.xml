@@ -139,9 +139,8 @@ ${line}
   		</copy> 
 	</target>
 	
-	
 	<target name="compile">
-		<javac srcdir="${project.tmp}/${project.name}/src" destdir="${project.bin}" source="${java.target.version}" target="${java.target.version}" includeantruntime="false">
+		<javac srcdir="${project.tmp}/${project.name}/src" destdir="${project.bin}" source="${java.target.version}" target="${java.target.version}" debug="on" includeantruntime="false">
 			<classpath>
 				<path refid="classpath"/>
 			</classpath>

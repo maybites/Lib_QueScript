@@ -6,7 +6,6 @@ import ch.maybites.quescript.expression.Expression;
 import ch.maybites.quescript.expression.ExpressionVar;
 import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.expression.Expression.ExpressionException;
-import ch.maybites.quescript.messages.CMsgFade;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.ScriptMsgException;
 import ch.maybites.tools.Debugger;
@@ -30,11 +29,11 @@ public class CmndExpr extends Cmnd {
 	 */
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
 		try {
-			variable = new Expression(super.content, "{", "}").parse(rt);
+			variable = new Expression(super.content, "{", "}").setInfo(" at line(" + lineNumber + ")").parse(rt);
 		} catch (ExpressionException e) {
 			throw new ScriptMsgException("QueScript - Command <expr>: Value Expression: " + e.getMessage());
 		}
-		if(getDebugMode())
+		if(debugMode)
 			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+"created expr-Comnd = "+ super.content);	
 
 	}

@@ -1,17 +1,9 @@
 package ch.maybites.quescript.commands;
 
-import java.util.Enumeration;
-
 import org.w3c.dom.Node;
 
-import com.cycling74.max.Atom;
-
-import ch.maybites.quescript.expression.Expression;
-import ch.maybites.quescript.expression.ExpressionVar;
 import ch.maybites.quescript.expression.RunTimeEnvironment;
-import ch.maybites.quescript.expression.Expression.ExpressionException;
 import ch.maybites.quescript.messages.CMsgShuttle;
-import ch.maybites.quescript.messages.CMsgTime;
 import ch.maybites.quescript.messages.ScriptMsgException;
 import ch.maybites.tools.Debugger;
 
@@ -45,7 +37,7 @@ public class CmndElse extends Cmnd {
 	 * Parse the Expressions with the RuntimeEnvironement
 	 */
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
-		if(getDebugMode())
+		if(debugMode)
 			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created "+cmdName+"-Comnd");
 		// Make sure the que- and local- variables are created before the children are parsed
 		for(Cmnd child: this.getChildren()){

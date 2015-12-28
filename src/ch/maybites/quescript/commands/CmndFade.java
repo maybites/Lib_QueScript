@@ -2,8 +2,6 @@ package ch.maybites.quescript.commands;
 
 import org.w3c.dom.Node;
 
-import ch.maybites.quescript.expression.Expression;
-import ch.maybites.quescript.expression.ExpressionVar;
 import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.expression.Expression.ExpressionException;
 import ch.maybites.quescript.messages.CMsgFade;
@@ -37,14 +35,14 @@ public class CmndFade extends Cmnd {
 		// use the attribute or the first value of the key
 		if(this.hasAttributeValue(ATTR_FADEOUT))
 			try {
-				fadetime = getAttributeTime(getAttributeValue(ATTR_FADEOUT),rt);
+				fadetime = getAttributeTime(getAttributeValue(ATTR_FADEOUT), " at line(" + lineNumber + ")",rt);
 			} catch (ExpressionException e) {
 				throw new ScriptMsgException("Setting fadeout: Invalid time format: " + e.getMessage());
 			}
 		if(this.hasAttributeValue(ATTR_NAME))
 			name = getAttributeValue(ATTR_NAME);
 
-		if(getDebugMode())
+		if(debugMode)
 			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+"created fade Comnd");	
 	}
 

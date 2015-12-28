@@ -1,20 +1,13 @@
 package ch.maybites.quescript.messages;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Timer;
-
-import com.cycling74.max.Atom;
-
 public class CMsgTrigger implements CMsgInterface{
 	String trigger;
-	Atom[] triggerVals;
+	String[] triggerVals;
 	String[] triggerVariables;
 	
 	boolean isArmed = false;
 	
-	public CMsgTrigger(String _trigger, Atom[] _values){
+	public CMsgTrigger(String _trigger, String[] _values){
 		trigger = _trigger;
 		triggerVals = _values;
 	}
@@ -48,7 +41,7 @@ public class CMsgTrigger implements CMsgInterface{
 			int isMatch = (trigger.equals(segmts[0]))? 1: 0;
 			for(int i = 1; i < segmts.length; i++){
 				if(triggerVals.length >= i){
-					isMatch *= (triggerVals[i - 1].toString().equals(segmts[i]))? 1: 0;
+					isMatch *= (triggerVals[i - 1].equals(segmts[i]))? 1: 0;
 				}
 			}
 			return (isMatch == 1)? true: false;

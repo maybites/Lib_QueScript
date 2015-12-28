@@ -1,9 +1,10 @@
 /*
- * Copyright 2012/2015 Udo Klimaschewski / Martin Fröhlich
+ * Copyright 2015/2016 Martin Fröhlich
+ * Copyright 2012/2015 Udo Klimaschewski
  * 
+ * http://maybites.ch
  * http://UdoJava.com/
  * http://about.me/udo.klimaschewski
- * http://maybites.ch
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -30,11 +31,8 @@ package ch.maybites.quescript.expression;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Stack;
 
 import ch.maybites.quescript.expression.RunTimeEnvironment.Function;
@@ -334,6 +332,11 @@ public class Expression {
 	private String expression = null;
 
 	/**
+	 * 
+	 */
+	private String infoString = "";
+	
+	/**
 	 * The cached RPN (Reverse Polish Notation) of the expression.
 	 */
 	private List<String> rpn = null;
@@ -382,6 +385,18 @@ public class Expression {
 			expression = expression.substring(0, expression.length() - trimEnd.length());
 		this.expression = expression;
 	}
+	
+	/**
+	 * Allows to enter some more infos about the expression. ie. in which line of the script
+	 * it is located. Usefull for debugging purposes.
+	 * 
+	 * @param infoString
+	 * @return
+	 */
+	public Expression setInfo(String infoString){
+		this.infoString = infoString;
+		return this;
+	}
 
 	/**
 	 * Is the string a number?
@@ -417,8 +432,6 @@ public class Expression {
 		List<String> outputQueue = new ArrayList<String>();
 		Stack<String> stack = new Stack<String>();
 
-		int insideString = 0;
-		
 		Tokenizer tokenizer = new Tokenizer(expression);
 
 		String lastFunction = null;
@@ -497,18 +510,18 @@ public class Expression {
 			String element = stack.pop();
 			if ("(".equals(element) || ")".equals(element)) {
 				throw new ExpressionException(
-						"Mismatched parentheses - missing closing ) \n" + expression + "");
+						"Mismatched parentheses - missing closing ) \n" + "{"+expression+"}" + infoString);
 			}
 			if ("'".equals(element)) {
 				throw new ExpressionException(
-						"Mismatched string - Missing text delimiter ' \n" + expression + "");
+						"Mismatched string - Missing text delimiter ' \n" + "{"+expression+"}" + infoString);
 			}
 			if(element.startsWith("'") && element.endsWith("'")){
 				outputQueue.add(element);
 			} else if (!rt.operators.containsKey(element)) {
 				throw new ExpressionException(
 						"Unknown operator or function: '"
-								+ element + "' \n" + expression + "");
+								+ element + "' \n" + "{"+expression+"}" + infoString);
 			} else {
 				outputQueue.add(element);
 			}
@@ -555,14 +568,14 @@ public class Expression {
 			}
 			if (counter < 0) {
 				throw new ExpressionException("Too many operators or functions at: "
-					+ token);
+					+ token + " | " +"{"+expression+"}" + infoString);
 			}
 			counter++;
 		}
 		if (counter > 1) {
-			throw new ExpressionException("Too many numbers or variables");
+			throw new ExpressionException("Too many numbers or variables | " +"{"+expression+"}" + infoString);
 		} else if (counter < 1) {
-			throw new ExpressionException("Empty expression");
+			throw new ExpressionException("Empty expression | " +"{"+expression+"}" + infoString);
 		}
 	}
 
@@ -607,7 +620,7 @@ public class Expression {
 					stack.pop();
 				}
 				if (!f.numParamsVaries() && p.size() != f.getNumParams()) {
-					throw new ExpressionException("Function " + token + " expected " + f.getNumParams() + " parameters, got " + p.size());
+					throw new ExpressionException("Function " + token + " expected " + f.getNumParams() + " parameters, got " + p.size() + " | " +"{"+expression+"}" + infoString);
 				}
 				stack.push(new ExpressionVar(f, p));
 			} else if ("(".equals(token)) {
@@ -645,7 +658,7 @@ public class Expression {
 				stack.add(newvar);
 			}
 		}
-		return stack.pop().setExpression(expression);
+		return stack.pop().setExpression("{"+expression+"}" + infoString);
 	}
 
 	private int getDomainAssignmentPrefix(String var){
@@ -675,7 +688,7 @@ public class Expression {
 				result.append(st);
 			}
 		} else {
-			throw new ExpressionException("Expression not parsed yet: " + expression);
+			throw new ExpressionException("Expression not parsed yet: " + "{"+expression+"}"  + infoString);
 		}
 		return result.toString();
 	}
@@ -837,6 +850,6 @@ public class Expression {
 	private String createError(String error, int atpos){
 		char[] array = new char[atpos - 1];
 	    Arrays.fill(array, ' ');
-	    return error + "\n" + expression + "\n" + new String(array) + "^";
+	    return error + "\n" + "{"+expression+"}" + infoString + "\n" + new String(array) + "^";
 	}
 }

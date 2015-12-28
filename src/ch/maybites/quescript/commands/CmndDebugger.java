@@ -5,9 +5,6 @@ import java.util.Iterator;
 
 import org.w3c.dom.Node;
 
-import com.cycling74.max.Atom;
-
-import ch.maybites.quescript.expression.Expression;
 import ch.maybites.quescript.expression.ExpressionVar;
 import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.messages.CMsgShuttle;
@@ -50,7 +47,7 @@ public class CmndDebugger extends Cmnd {
 				showGlobal = true;
 		}
 
-		if(getDebugMode())
+		if(debugMode)
 			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created "+cmdName+"-Comnd");			
 	}
 
@@ -67,7 +64,7 @@ public class CmndDebugger extends Cmnd {
 	}
 
 	public void lockLessBang(CMsgShuttle _msg){
-		if(getDebugMode()){
+		if(debugMode){
 			HashMap<String, ExpressionVar> locals = (HashMap<String, ExpressionVar>) prt.getPrivateVars();
 			HashMap<String, ExpressionVar> que = (HashMap<String, ExpressionVar>) prt.getProtectedVars();
 			HashMap<String, ExpressionVar> global = (HashMap<String, ExpressionVar>) prt.getPublicVars();
@@ -75,44 +72,45 @@ public class CmndDebugger extends Cmnd {
 			ExpressionVar exVar;
 			Iterator<String> it;
 			if(showLocal || showQue || showGlobal){
-				this.getOutput().outputSendMsg("print", Atom.newAtom(new String[]{"DEBUGGER"}));
-				this.getOutput().outputSendMsg("print", Atom.newAtom(new String[]{"------------------"}));
+				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("DEBUGGER").done());
+				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("------------------").done());
+
 			} else {
-				this.getOutput().outputSendMsg("print", Atom.newAtom(new String[]{"QueScript: <debugger> usage:"}));
-				this.getOutput().outputSendMsg("print", Atom.newAtom(new String[]{"<debugger " + ATTR_SHOWVARDOMAIN + "=\"local, que, global\" />"}));
+				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("QueScript: <debugger> usage:").done());
+				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("<debugger " + ATTR_SHOWVARDOMAIN + "=\"local, que, global\" />").done());
 			}
 				
 			if(showLocal){
-				this.getOutput().outputSendMsg("print", Atom.newAtom(new String[]{"Local Variables:"}));
+				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("Local Variables:").done());
 				it = locals.keySet().iterator();
 				while(it.hasNext()){
 					var = it.next();
 					exVar = locals.get(var);
-					this.getOutput().outputSendMsg("print", Atom.newAtom(new String[]{var, " = ", exVar.getStringValue(), " (" + ((exVar.isNumber)?"float":"string") + ")"}));
+					getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add(var).add(" = ").add(exVar.getStringValue()).add(" (" + ((exVar.isNumber)?"float":"string") + ")").done());
 				}
-				this.getOutput().outputSendMsg("print", Atom.newAtom(new String[]{"------------------"}));
+				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("------------------").done());
 			}
 						
 			if(showQue){
-				this.getOutput().outputSendMsg("print", Atom.newAtom(new String[]{"Que Variables:"}));
+				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("Que Variables:").done());
 				it = que.keySet().iterator();
 				while(it.hasNext()){
 					var = it.next();
 					exVar = que.get(var);
-					this.getOutput().outputSendMsg("print", Atom.newAtom(new String[]{var, " = ", exVar.getStringValue(), " (" + ((exVar.isNumber)?"float":"string") + ")"}));
+					getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add(var).add(" = ").add(exVar.getStringValue()).add(" (" + ((exVar.isNumber)?"float":"string") + ")").done());
 				}
-				this.getOutput().outputSendMsg("print", Atom.newAtom(new String[]{"------------------"}));
+				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("------------------").done());
 			}
 
 			if(showGlobal){
-				this.getOutput().outputSendMsg("print", Atom.newAtom(new String[]{"Global Variables:"}));
+				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("Global Variables:").done());
 				it = global.keySet().iterator();
 				while(it.hasNext()){
 					var = it.next();
 					exVar = global.get(var);
-					this.getOutput().outputSendMsg("print", Atom.newAtom(new String[]{var, " = ", exVar.getStringValue(), " (" + ((exVar.isNumber)?"float":"string") + ")"}));
+					getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add(var).add(" = ").add(exVar.getStringValue()).add(" (" + ((exVar.isNumber)?"float":"string") + ")").done());
 				}
-				this.getOutput().outputSendMsg("print", Atom.newAtom(new String[]{"------------------"}));
+				getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("------------------").done());
 			}
 		}		
 	}

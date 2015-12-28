@@ -1,10 +1,7 @@
 package ch.maybites.quescript.commands;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -13,7 +10,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import ch.maybites.quescript.OutputInterface;
 import ch.maybites.quescript.expression.Expression;
 import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.expression.Expression.ExpressionException;
@@ -32,7 +28,9 @@ public abstract class Cmnd{
 	Cmnd parentNode;
 
 	protected int level;
-	protected int line = -1;
+	
+	int lineNumber;
+
 	protected String content;
 	public String queName;
 	
@@ -43,7 +41,6 @@ public abstract class Cmnd{
 
 	public Cmnd(Cmnd _parentNode){
 		parentNode = _parentNode;
-		line = getLine();
 		level = (parentNode != null)?parentNode.getLevel() + 1 : 1;
 		attributes = new HashMap<String, String>();
 		children = new ArrayList<Cmnd>();
@@ -62,11 +59,11 @@ public abstract class Cmnd{
 		return "unknown";
 	}
 
-	public boolean getDebugMode(){
-		if(parentNode != null){
-			return parentNode.getDebugMode();
+	public void setDebugMode(boolean _debugMode){
+		debugMode = _debugMode;
+		for(Cmnd child: children){
+			child.setDebugMode(_debugMode);
 		}
-		return debugMode;
 	}
 
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
@@ -81,6 +78,8 @@ public abstract class Cmnd{
 	 */
 	public void build(Node _xmlNode) throws ScriptMsgException{
 		NamedNodeMap values = _xmlNode.getAttributes();
+		
+		lineNumber = Integer.parseInt((String)_xmlNode.getUserData("lineNumber"));
 
 		for(int i = 0; i < values.getLength(); i++){
 			attributes.put(values.item(i).getNodeName(), values.item(i).getNodeValue());
@@ -123,20 +122,10 @@ public abstract class Cmnd{
 						child = new CmndElse(this);
 					else if(childName.equals(CmndDebugger.NODE_NAME))
 						child = new CmndDebugger(this);
-					else if(childName.equals("ramp"))
-						child = new CmndRamp(this);
 					else if(childName.equals(CmndFade.NODE_NAME))
 						child = new CmndFade(this);
 					else if(childName.equals(CmndKeys.NODE_NAME))
 						child = new CmndKeys(this);
-					else if(childName.equals("f1"))
-						child = new CmndDOUBLE(this, "f1");
-					else if(childName.equals("f2"))
-						child = new CmndDOUBLE(this, "f2");
-					else if(childName.equals("f3"))
-						child = new CmndDOUBLE(this, "f3");
-					else if(childName.equals("f4"))
-						child = new CmndDOUBLE(this, "f4");
 					else if(childName.equals(CmndInternal.NODE_NAME_STOP))
 						child = new CmndInternal(this, CmndInternal.NODE_NAME_STOP);
 					else if(childName.equals(CmndInternal.NODE_NAME_PLAY))
@@ -151,6 +140,7 @@ public abstract class Cmnd{
 						Debugger.verbose("NodeFactory", "found invalid child node: name = '"+childName+"'");			
 
 					if(child != null){
+						child.setDebugMode(debugMode);
 						child.build(nodeCildren.item(i));
 						children.add(child);
 					}
@@ -229,9 +219,9 @@ public abstract class Cmnd{
 	 * @throws ScriptMsgException
 	 * @throws ExpressionException
 	 */
-	protected CMsgTime getAttributeTime(String expr, RunTimeEnvironment rt) throws ScriptMsgException, ExpressionException{
+	protected CMsgTime getAttributeTime(String expr, String info, RunTimeEnvironment rt) throws ScriptMsgException, ExpressionException{
 		if(expr.startsWith("{") && expr.endsWith("}")){
-			return new CMsgTime(new Expression(expr, "{", "}").parse(rt), 0);
+			return new CMsgTime(new Expression(expr, "{", "}").setInfo(info).parse(rt), 0);
 		} else {
 			return new CMsgTime(expr);
 		}
@@ -268,18 +258,6 @@ public abstract class Cmnd{
 	 */
 	public int getLevel(){
 		return level;
-	}
-
-	/**
-	 * get the absolute line inside the que of this object
-	 * @return
-	 */
-	private int getLine(){
-		if(parentNode == null){
-			return ++line;
-		} else {
-			return parentNode.getLine();
-		}
 	}
 
 	public String getAttributeList(){

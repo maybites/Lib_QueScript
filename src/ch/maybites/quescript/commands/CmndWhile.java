@@ -1,10 +1,6 @@
 package ch.maybites.quescript.commands;
 
-import java.util.Enumeration;
-
 import org.w3c.dom.Node;
-
-import com.cycling74.max.Atom;
 
 import ch.maybites.quescript.expression.Expression;
 import ch.maybites.quescript.expression.ExpressionVar;
@@ -12,7 +8,6 @@ import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.expression.Expression.ExpressionException;
 import ch.maybites.quescript.messages.CMsgAnim;
 import ch.maybites.quescript.messages.CMsgShuttle;
-import ch.maybites.quescript.messages.CMsgTime;
 import ch.maybites.quescript.messages.ScriptMsgException;
 import ch.maybites.tools.Debugger;
 
@@ -65,11 +60,11 @@ public class CmndWhile extends Cmnd {
 
 		try {
 			if(getAttributeValue(ATTR_START) != null){
-				startCondition = new Expression(getAttributeValue(ATTR_START), "{", "}").parse(prt);
+				startCondition = new Expression(getAttributeValue(ATTR_START), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(prt);
 			}
-			ifCondition = new Expression(getAttributeValue(ATTR_REPEAT), "{", "}").parse(prt);
+			ifCondition = new Expression(getAttributeValue(ATTR_REPEAT), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(prt);
 			if(getAttributeValue(ATTR_STEP) != null){
-				stepCondition = new Expression(getAttributeValue(ATTR_STEP), "{", "}").parse(prt);
+				stepCondition = new Expression(getAttributeValue(ATTR_STEP), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(prt);
 			}
 			if(getAttributeValue(ATTR_NAME) != null){
 				name = getAttributeValue(ATTR_NAME);
@@ -78,7 +73,7 @@ public class CmndWhile extends Cmnd {
 			throw new ScriptMsgException("Command <while>: Attribute Expression: " + e.getMessage());
 		}
 
-		if(getDebugMode())
+		if(debugMode)
 			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created while Cmnd: " + getAttributeValue(ATTR_REPEAT));
 
 		// Make sure the que- and local- variables are created before the children are parsed

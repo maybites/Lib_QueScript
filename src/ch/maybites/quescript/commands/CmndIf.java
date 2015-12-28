@@ -1,17 +1,12 @@
 package ch.maybites.quescript.commands;
 
-import java.util.Enumeration;
-
 import org.w3c.dom.Node;
-
-import com.cycling74.max.Atom;
 
 import ch.maybites.quescript.expression.Expression;
 import ch.maybites.quescript.expression.ExpressionVar;
 import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.expression.Expression.ExpressionException;
 import ch.maybites.quescript.messages.CMsgShuttle;
-import ch.maybites.quescript.messages.CMsgTime;
 import ch.maybites.quescript.messages.ScriptMsgException;
 import ch.maybites.tools.Debugger;
 
@@ -61,10 +56,10 @@ public class CmndIf extends Cmnd {
 			try {
 				if(smode.equals(ATTR_TRUE)){
 					mode = MODE_TRUE;
-					ifCondition = new Expression(getAttributeValue(ATTR_TRUE), "{", "}").parse(rt);
+					ifCondition = new Expression(getAttributeValue(ATTR_TRUE), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(rt);
 				} else if(smode.equals(ATTR_FALSE)){
 					mode = MODE_FALSE;
-					ifCondition = new Expression(getAttributeValue(ATTR_FALSE), "{", "}").parse(rt);
+					ifCondition = new Expression(getAttributeValue(ATTR_FALSE), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(rt);
 				}
 			} catch (ExpressionException e) {
 				throw new ScriptMsgException("Command <if>: Attribute Expression: " + e.getMessage());
@@ -74,7 +69,7 @@ public class CmndIf extends Cmnd {
 			throw new ScriptMsgException("<if>: illegal attribute");
 		}	
 	
-		if(getDebugMode())
+		if(debugMode)
 			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created If Cmnd: " + getAttributeValue(smode));
 
 		// Make sure the que- and local- variables are created before the children are parsed

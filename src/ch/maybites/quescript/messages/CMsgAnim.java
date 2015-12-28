@@ -1,12 +1,5 @@
 package ch.maybites.quescript.messages;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Timer;
-
-import com.cycling74.max.Atom;
-
 public class CMsgAnim implements CMsgInterface{
 	String ramp;
 	

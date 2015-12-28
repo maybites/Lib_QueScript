@@ -2,8 +2,6 @@ package ch.maybites.quescript.commands;
 
 import org.w3c.dom.Node;
 
-import com.cycling74.max.Atom;
-
 import ch.maybites.quescript.expression.Expression;
 import ch.maybites.quescript.expression.ExpressionVar;
 import ch.maybites.quescript.expression.RunTimeEnvironment;
@@ -64,16 +62,16 @@ public class CmndWait extends Cmnd {
 			try {
 				if(smode.equals(ATTR_COUNTDOWN)){
 					mode = MODE_COUNTDOWN;
-					myTime = getAttributeTime(getAttributeValue(ATTR_COUNTDOWN),rt);
+					myTime = getAttributeTime(getAttributeValue(ATTR_COUNTDOWN), " at line(" + lineNumber + ")",rt);
 				} else if(smode.equals(ATTR_WATCH)){
 					mode = MODE_WATCH;
-					myTime = getAttributeTime(getAttributeValue(ATTR_WATCH),rt);
+					myTime = getAttributeTime(getAttributeValue(ATTR_WATCH), " at line(" + lineNumber + ")",rt);
 				} else if(smode.equals(ATTR_HOURGLASS)){
 					mode = MODE_HOURGLASS;
-					myTime = getAttributeTime(getAttributeValue(ATTR_HOURGLASS),rt);
+					myTime = getAttributeTime(getAttributeValue(ATTR_HOURGLASS), " at line(" + lineNumber + ")",rt);
 				} else if(smode.equals(ATTR_TIMER)){
 					mode = MODE_TIMER;
-					myTime = getAttributeTime(getAttributeValue(ATTR_TIMER),rt);
+					myTime = getAttributeTime(getAttributeValue(ATTR_TIMER), " at line(" + lineNumber + ")",rt);
 				} else if(smode.equals(ATTR_COMPLEX)){
 					mode = MODE_COMPLEX;
 				} else if(smode.equals(ATTR_TRIGGER)){
@@ -84,13 +82,13 @@ public class CmndWait extends Cmnd {
 					mode = MODE_ANIM;
 				} else if(smode.equals(ATTR_UNTIL)){
 					mode = MODE_UNTIL;
-					untilWhileCondition = new Expression(getAttributeValue(ATTR_UNTIL), "{", "}").parse(rt);
+					untilWhileCondition = new Expression(getAttributeValue(ATTR_UNTIL), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(rt);
 				} else if(smode.equals(ATTR_WHILE)){
 					mode = MODE_WHILE;
-					untilWhileCondition = new Expression(getAttributeValue(ATTR_WHILE), "{", "}").parse(rt);
+					untilWhileCondition = new Expression(getAttributeValue(ATTR_WHILE), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(rt);
 				}
 				
-				if(getDebugMode())
+				if(debugMode)
 					Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created Wait Cmnd with mode = " + smode);
 			} catch (ScriptMsgException e) {
 					throw new ScriptMsgException("<wait>: Attribute Expression: " + e.getMessage());
@@ -109,7 +107,6 @@ public class CmndWait extends Cmnd {
 
 	}
 
-	@Override
 	public void bang(CMsgShuttle _msg) {
 		if(mode != -1){
 			if(_msg.isInStopMode()){
@@ -117,8 +114,8 @@ public class CmndWait extends Cmnd {
 			}
 			if(!_msg.isWaitLocked()){
 				_msg.lockWaitLock(this);
-				getOutput().outputInfoMsg("script", new Atom[]{Atom.newAtom(this.line)});
-				getOutput().outputInfoMsg("info", new Atom[]{Atom.newAtom(parentNode.getQueName() + " : " + getMainAttribute())});
+				getOutput().outputInfoMsg(QueMsgFactory.getMsg("script").add(lineNumber - getQueLineNumber()).done());
+				getOutput().outputInfoMsg(QueMsgFactory.getMsg("info").add(parentNode.getQueName() + " : " + getMainAttribute()).done());
 			}
 			if(_msg.isWaitLockedBy(this)){
 				if(logic(_msg)){
@@ -127,13 +124,21 @@ public class CmndWait extends Cmnd {
 							child.bang(_msg);
 					}
 					_msg.freeWaitLock(this);
-					getOutput().outputInfoMsg("info", new Atom[]{Atom.newAtom("-")});
+					getOutput().outputInfoMsg(QueMsgFactory.getMsg("info").add("-").done());
 				}
 			}
 		}
 	}
 
 	public void lockLessBang(CMsgShuttle _msg){;}
+
+	private int getQueLineNumber(){
+		Cmnd myParent = this.parentNode;
+		while(!(myParent instanceof CmndQue)){
+			myParent = myParent.parentNode;
+		}
+		return myParent.lineNumber;
+	}
 
 	protected boolean logic(CMsgShuttle _msg){
 		switch(mode){

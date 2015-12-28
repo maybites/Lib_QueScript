@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 import org.w3c.dom.Node;
 
-import com.cycling74.max.Atom;
-
 import ch.maybites.quescript.expression.*;
 import ch.maybites.quescript.messages.*;
 import ch.maybites.tools.Debugger;
@@ -17,7 +15,6 @@ public class CmndQue extends Cmnd{
 	private static String ATTR_LOOP = "loop";
 
 	private static String ATTR_LOOP_VAL_NO = "no";
-	private static String ATTR_LOOP_VAL_YES = "yes";
 	
 	CMsgShuttle executionShuttle;
 		
@@ -28,13 +25,14 @@ public class CmndQue extends Cmnd{
 	RunTimeEnvironment localExprEnvironment;
 
 	CMsgTime pauseTime;
-	
+		
 	protected CmndQue(Cmnd _parentNode){
 		super(_parentNode);
 		super.setCmndName(NODE_NAME);
 		
     	localExprEnvironment = new RunTimeEnvironment();
-	}
+    	
+  	}
 	
 	public void build(Node _xmlNode) throws ScriptMsgException{
 		super.build(_xmlNode);
@@ -51,8 +49,8 @@ public class CmndQue extends Cmnd{
 	 * local Expression-runtime-environment
 	 */
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
-		if(getDebugMode())
-			Debugger.verbose("QueScript - NodeFactory", "... created Que:" + queName);	
+		if(debugMode)
+			Debugger.verbose("QueScript - NodeFactory", "... created Que:" + queName + " at " + lineNumber);	
 
 		localExprEnvironment.setPublicVars(rt.getPublicVars());
 		localExprEnvironment.setProtectedVariable("$TIMER", 0);
@@ -80,12 +78,20 @@ public class CmndQue extends Cmnd{
 		executionShuttle.setDebugInfo(debugMode);
 
 		// pass the info of how many lines are in this que
-		getOutput().outputInfoMsg("quename", new Atom[]{Atom.newAtom(queName)});
+		getOutput().outputInfoMsg(QueMsgFactory.getMsg("quename").add(queName).done());
 
 		// pass the info of how many lines are in this que
-		getOutput().outputInfoMsg("script", new Atom[]{Atom.newAtom("size"), Atom.newAtom(line)});
+		getOutput().outputInfoMsg(QueMsgFactory.getMsg("script").add("size").add(getQueLineSize()).done());
 		
 		isPlaying = true;
+	}
+	
+	private int getQueLineSize(){
+		Cmnd lastChild = this.getChildren().get(getChildren().size()-1);
+		while(lastChild.getChildren().size() > 0){
+			lastChild = lastChild.getChildren().get(lastChild.getChildren().size()-1);
+		}
+		return lastChild.lineNumber - lineNumber;
 	}
 	
 	public void resume(){

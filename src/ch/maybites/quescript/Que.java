@@ -1,18 +1,20 @@
 package ch.maybites.quescript;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-
 import com.cycling74.max.Atom;
 import com.cycling74.max.DataTypes;
 import com.cycling74.max.MaxObject;
 
-import ch.maybites.quescript.commands.CmndInternal;
-import ch.maybites.quescript.commands.CmndMessage;
-import ch.maybites.quescript.messages.CMsgTrigger;
+import ch.maybites.quescript.commands.QSManager;
+import ch.maybites.quescript.commands.QueMsgFactory;
 import ch.maybites.tools.Debugger;
 
-public class Que extends MaxObject implements OutputInterface{
+/**
+ * QueScript External for MaxMSP
+ * 
+ * @author Martin Froehlich http://maybites.ch
+ *
+ */
+public class Que extends MaxObject implements OutputConnector{
 	
 	final int OUTLET_SEND = 0;
 	final int OUTLET_TRIGGER = 1;
@@ -20,20 +22,15 @@ public class Que extends MaxObject implements OutputInterface{
 	final int OUTLET_DUMP = 3;
 
 	QSManager queManager;
-	
-	ArrayList<String[]> selfCommands;
-	
-	int viewplayingquesFreq = 0;
-	
-	long lastviewTime = 0;
-		
+			
 	public Que(Atom[] _args){
 		
 		declareInlets(new int[]{DataTypes.ALL, DataTypes.ALL});
 		declareOutlets(new int[]{DataTypes.ALL, DataTypes.ALL, DataTypes.ALL});
 
 		queManager = new QSManager();
-		selfCommands = new ArrayList<String[]>();
+		
+		QueMsgFactory.setMsgTypeToMax();
 	}
 	
 	/**
@@ -41,74 +38,15 @@ public class Que extends MaxObject implements OutputInterface{
 	 * @param _fileName
 	 */
 	public void read(String _fileName){
-		// pass on the scriptnode my instance so all child nodes 
-		// have a way to interface with me.
-		queManager.setOutput(this);
-		
+		queManager.registerConnector(this);
 		queManager.load(_fileName);
 	}
 	
 	/**
 	 * create next frame
 	 */
-	public void bang(){
-		// first execute self inflicted commands (the script calls itself)
-		if(selfCommands.size() > 0){
-			ArrayList<String[]> copyCommands = new ArrayList<String[]>();
-			for(String[] cmd: selfCommands){
-				copyCommands.add(cmd);
-			}
-			// then clear all the commands
-			selfCommands.clear();
-			for(String[] cmd: copyCommands){
-				if(cmd[0].equals(CmndInternal.NODE_NAME_PLAY)){
-					queManager.play(cmd[2]);
-				}else if(cmd[0].equals(CmndInternal.NODE_NAME_STOP)){
-					if(cmd[2] == null){ // no name attribute was set at the stop message
-						queManager.stopExcept(cmd[1]);
-					} else { // there was a name attribute
-						queManager.stop(cmd[2]);
-					}
-				}else if(cmd[0].equals(CmndInternal.NODE_NAME_SHUTDOWN)){
-					if(cmd[2] == null){ // no name attribute was set at the shutdown message
-						queManager.shutDownExcept(cmd[1]);
-					} else { // there was a name attribute
-						queManager.shutdown(cmd[2]);
-					}
-				}else if(cmd[0].equals(CmndInternal.NODE_NAME_PAUSE)){
-					if(cmd[2] == null){ // no name attribute was set at the pause message
-						queManager.pauseExcept(cmd[1]);
-					} else { // there was a name attribute
-						queManager.pause(cmd[2]);
-					}
-				}else if(cmd[0].equals(CmndInternal.NODE_NAME_RESUME)){
-					if(cmd[2] == null){ // no name attribute was set at the play message
-						queManager.resume();
-					} else { // there was a name attribute
-						queManager.resume(cmd[2]);
-					}
-				}else if(cmd[0].equals(CmndMessage.NODE_NAME_TRIGGER)){
-					if(cmd.length == 3){ // 
-						trigger(cmd[2], null);
-					} else if(cmd.length > 3){
-						Atom[] args = new Atom[cmd.length - 3];
-						for(int i = 3; i < cmd.length; i++){
-							args[i - 3] = Atom.newAtom(cmd[i]);
-						}
-						trigger(cmd[2], args);
-					}
-				}
-			}
-		}
-		
-		long timer = System.currentTimeMillis();
-		// and then keep on going
+	public void bang(){		
 		queManager.bang();
-		
-		if(viewplayingquesFreq > 0 && lastviewTime + (1000 / viewplayingquesFreq) < timer ){
-			lastviewTime = timer;
-			outlet(OUTLET_INFO, "playtime", System.currentTimeMillis() - timer);
-		}
 	}
 	
 	/**
@@ -150,7 +88,7 @@ public class Que extends MaxObject implements OutputInterface{
 	 * @param _frequency the number of updates per second.
 	 */
 	public void viewplayingques(int _frequency){
-		viewplayingquesFreq = _frequency;
+		queManager.viewplayingques(_frequency);
 	}
 	
 	/**
@@ -166,11 +104,11 @@ public class Que extends MaxObject implements OutputInterface{
 	 * @param _args list
 	 */
 	public void trigger(Atom[] _args){
-		Atom[] args = new Atom[_args.length - 1];
+		String[] args = new String[_args.length - 1];
 		for(int i = 1; i < _args.length; i++){
-			args[i - 1] = _args[i];
+			args[i - 1] = _args[i].getString();
 		}		
-		trigger(_args[0].toString(), args);
+		queManager.trigger(_args[0].toString(), args);
 	}
 
 	/**
@@ -178,16 +116,7 @@ public class Que extends MaxObject implements OutputInterface{
 	 * @param _triggerName string
 	 */
 	public void trigger(String _triggerName){
-		trigger(_triggerName, null);
-	}
-
-	/**
-	 * trigger message 
-	 * @param _triggerName
-	 * @param args
-	 */
-	public void trigger(String _triggerName, Atom[] args){
-		queManager.trigger(new CMsgTrigger(_triggerName, args));
+		queManager.trigger(_triggerName, null);
 	}
 		
 	/**
@@ -277,33 +206,19 @@ public class Que extends MaxObject implements OutputInterface{
 			Debugger.setLevelToFatal();
 	}
 
-	public void outputSendMsg(String _msg, Atom[] _vals) {
-		if(_vals != null)
-			outlet(OUTLET_SEND, _msg, _vals);
-		else
-			outlet(OUTLET_SEND, _msg);
+	public void outputSendMsg(QueMessage msg) {
+		if(msg.hasAtoms())
+			outlet(OUTLET_SEND, (Atom[])msg.getAtoms());
 	}
 
-	public void outputTriggerMsg(Atom[] _vals) {
-		outlet(OUTLET_TRIGGER, _vals);
-	}
-
-	public void outputInfoMsg(String _msg, Atom[] _vals) {
-		if(_vals != null)
-			outlet(OUTLET_INFO, _msg, _vals);
-		else
-			outlet(OUTLET_INFO, _msg);
+	public void outputInfoMsg(QueMessage msg) {
+		if(msg.hasAtoms())
+			outlet(OUTLET_INFO, (Atom[])msg.getAtoms());
 	}
 	
-	public void outputDumpMsg(String _msg, Atom[] _vals) {
-		if(_vals != null)
-			outlet(OUTLET_DUMP, _msg, _vals);
-		else
-			outlet(OUTLET_DUMP, _msg);
+	public void outputDumpMsg(QueMessage msg) {
+		if(msg.hasAtoms())
+			outlet(OUTLET_DUMP, (Atom[])msg.getAtoms());
 	}
-	
-	public void outputSelfCommand(String[] _comnd) {
-		selfCommands.add(_comnd);
-	}
-
+		
 }

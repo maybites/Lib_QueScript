@@ -1,13 +1,10 @@
 package ch.maybites.quescript.commands;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Iterator;
 
 import org.w3c.dom.Node;
 
-import ch.maybites.quescript.expression.Expression;
 import ch.maybites.quescript.expression.ExpressionVar;
 import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.expression.Expression.ExpressionException;
@@ -40,7 +37,6 @@ public class CmndAnim extends Cmnd {
 	private final static int EXECUTE_PALINDROME = LOOP_MODE_PALINDROME;
 	private final static int EXECUTE_PAUSE 		= 4;
 	private final static int EXECUTE_FADEOUT 	= 5;
-	private final static int EXECUTE_SHUTDOWN 	= 6;
 	
 	private int loop;
 	private String name;
@@ -85,7 +81,7 @@ public class CmndAnim extends Cmnd {
 	 * Parse the Expressions with the RuntimeEnvironement
 	 */
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{		
-		if(getDebugMode())
+		if(debugMode)
 			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created Anim Comnd: name='" + name +"'");	
 
 		privateExprEnvironment.setPublicVars(rt.getPublicVars());
@@ -95,10 +91,10 @@ public class CmndAnim extends Cmnd {
 		String expr = "notset";
 		try {
 			expr = getAttributeValue(ATTR_DURATION);
-			durationTime = getAttributeTime(expr, privateExprEnvironment);
+			durationTime = getAttributeTime(expr, " at line(" + lineNumber + ")",privateExprEnvironment);
 			if(hasAttributeValue(ATTR_FADEOUT)){
 				expr = getAttributeValue(ATTR_FADEOUT);
-				fadeoutTime = getAttributeTime(expr,privateExprEnvironment);
+				fadeoutTime = getAttributeTime(expr, " at line(" + lineNumber + ")",privateExprEnvironment);
 				// a fadeout time of zero is causing troubles with the algorithm:
 				// better set it to very short.
 				if(fadeoutTime.getTotalMillis()==0){

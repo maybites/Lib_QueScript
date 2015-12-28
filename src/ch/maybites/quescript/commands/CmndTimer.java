@@ -23,7 +23,7 @@ public class CmndTimer extends Cmnd {
 	 * Parse the Expressions with the RuntimeEnvironement
 	 */
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
-		if(getDebugMode())
+		if(debugMode)
 			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created "+cmdName+"-Comnd");			
 	}
 

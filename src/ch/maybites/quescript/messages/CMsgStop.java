@@ -1,6 +1,5 @@
 package ch.maybites.quescript.messages;
 
-
 public class CMsgStop implements CMsgInterface{
 	public static int SHUTDOWN = 1;
 	public static int FULLSTOP = 2;
