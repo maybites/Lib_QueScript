@@ -114,8 +114,7 @@ public class CmndWait extends Cmnd {
 			}
 			if(!_msg.isWaitLocked()){
 				_msg.lockWaitLock(this);
-				getOutput().outputInfoMsg(QueMsgFactory.getMsg("script").add(lineNumber - getQueLineNumber()).done());
-				getOutput().outputInfoMsg(QueMsgFactory.getMsg("info").add(parentNode.getQueName() + " : " + getMainAttribute()).done());
+				getQue().setWait(lineNumber, getMainAttribute());
 			}
 			if(_msg.isWaitLockedBy(this)){
 				if(logic(_msg)){
@@ -124,7 +123,7 @@ public class CmndWait extends Cmnd {
 							child.bang(_msg);
 					}
 					_msg.freeWaitLock(this);
-					getOutput().outputInfoMsg(QueMsgFactory.getMsg("info").add("-").done());
+					getQue().setWait(lineNumber, "-");
 				}
 			}
 		}
@@ -132,12 +131,12 @@ public class CmndWait extends Cmnd {
 
 	public void lockLessBang(CMsgShuttle _msg){;}
 
-	private int getQueLineNumber(){
+	private CmndQue getQue(){
 		Cmnd myParent = this.parentNode;
 		while(!(myParent instanceof CmndQue)){
 			myParent = myParent.parentNode;
 		}
-		return myParent.lineNumber;
+		return (CmndQue)myParent;
 	}
 
 	protected boolean logic(CMsgShuttle _msg){
@@ -204,25 +203,31 @@ public class CmndWait extends Cmnd {
 		String ret = "";
 		switch(mode){
 		case MODE_COMPLEX:
-			ret = ATTR_COMPLEX + "=" + getAttributeValue(ATTR_COMPLEX);
+			ret = ATTR_COMPLEX + "='" + getAttributeValue(ATTR_COMPLEX) + "'";
 			break;
 		case MODE_TRIGGER:
-			ret = ATTR_TRIGGER + "=" + getAttributeValue(ATTR_TRIGGER);
+			ret = ATTR_TRIGGER + "='" + getAttributeValue(ATTR_TRIGGER) + "'";
 			break;
 		case MODE_ANIM:
-			ret = ATTR_ANIM + "=" + getAttributeValue(ATTR_ANIM);
+			ret = ATTR_ANIM + "='" + getAttributeValue(ATTR_ANIM) + "'";
 			break;
 		case MODE_TIMER:
-			ret = ATTR_TIMER + "=" + getAttributeValue(ATTR_TIMER);
+			ret = ATTR_TIMER + "='" + getAttributeValue(ATTR_TIMER) + "'";
 			break;
 		case MODE_WATCH:
-			ret = ATTR_WATCH + "=" + getAttributeValue(ATTR_WATCH);
+			ret = ATTR_WATCH + "='" + getAttributeValue(ATTR_WATCH) + "'";
 			break;
 		case MODE_HOURGLASS:
-			ret = ATTR_HOURGLASS + "=" + getAttributeValue(ATTR_HOURGLASS);
+			ret = ATTR_HOURGLASS + "='" + getAttributeValue(ATTR_HOURGLASS) + "'";
 			break;
 		case MODE_COUNTDOWN:
-			ret = ATTR_COUNTDOWN + "=" + getAttributeValue(ATTR_COUNTDOWN);
+			ret = ATTR_COUNTDOWN + "='" + getAttributeValue(ATTR_COUNTDOWN) + "'";
+			break;
+		case MODE_WHILE:
+			ret = ATTR_WHILE + "='" + getAttributeValue(ATTR_WHILE) + "'";
+			break;
+		case MODE_UNTIL:
+			ret = ATTR_UNTIL + "='" + getAttributeValue(ATTR_UNTIL) + "'";
 			break;
 		}
 		return ret;

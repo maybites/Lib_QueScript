@@ -22,8 +22,6 @@ public class CmndMessage extends Cmnd {
 	public static String NODE_NAME_OSC 		= "osc";
 
 	private static String ATTR_SENDTO = "sendto";
-
-	ArrayList<String> myVars;
 	
 	String sendto = "default";
 	
@@ -42,10 +40,7 @@ public class CmndMessage extends Cmnd {
 		if(this.hasAttributeValue(ATTR_SENDTO)){
 			sendto = getAttributeValue(ATTR_SENDTO);
 			myMessage.addSendTo(sendto);
-		}
-
-		myVars = new ArrayList<String>();
-	
+		}	
 	}
 	
 	private void parseContentString(String _content, RunTimeEnvironment rt) throws ExpressionException{
@@ -111,7 +106,11 @@ public class CmndMessage extends Cmnd {
 		}
 	}
 	
-	public void store(Node _parentElement) {
+	public void clear(){
+		myMessage.clear();
+		for(Cmnd child: getChildren()){
+			child.clear();
+		}
 	}
 	
 	public void bang(CMsgShuttle _msg) {

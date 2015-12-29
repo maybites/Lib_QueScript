@@ -25,12 +25,16 @@ public class CmndQue extends Cmnd{
 	RunTimeEnvironment prt;
 
 	CMsgTime pauseTime;
+	
+	protected int scriptLineSize;
+	protected int waitLineNumber;
+	protected String waitLineMsg = "";
 		
 	protected CmndQue(Cmnd _parentNode){
 		super(_parentNode);
 		super.setCmndName(NODE_NAME);  	
   	}
-	
+		
 	public void build(Node _xmlNode) throws ScriptMsgException{
 		super.build(_xmlNode);
 
@@ -39,6 +43,8 @@ public class CmndQue extends Cmnd{
 		queName = getAttributeValue(ATTR_NAME);
 		
 		executionShuttle = new CMsgShuttle();
+		
+		scriptLineSize = getQueLineSize();
 	}
 	
 	/**
@@ -78,19 +84,11 @@ public class CmndQue extends Cmnd{
 		getOutput().outputInfoMsg(QueMsgFactory.getMsg("quename").add(queName).done());
 
 		// pass the info of how many lines are in this que
-		getOutput().outputInfoMsg(QueMsgFactory.getMsg("script").add("size").add(getQueLineSize()).done());
+		getOutput().outputInfoMsg(QueMsgFactory.getMsg("script").add("size").add(scriptLineSize).done());
 		
 		isPlaying = true;
 	}
-	
-	private int getQueLineSize(){
-		Cmnd lastChild = this.getChildren().get(getChildren().size()-1);
-		while(lastChild.getChildren().size() > 0){
-			lastChild = lastChild.getChildren().get(lastChild.getChildren().size()-1);
-		}
-		return lastChild.lineNumber - lineNumber;
-	}
-	
+		
 	public void resume(){
 		if(!isPlaying && !executionShuttle.isOff()){
 			executionShuttle.frameBang(prt);
@@ -172,11 +170,26 @@ public class CmndQue extends Cmnd{
 			}
 		}
 	}
-	
-	public void update(){
+
+	public void clear(){
+		executionShuttle.clearMessages();
+		
+		for(Cmnd child: getChildren()){
+			child.clear();
+		}
+	}
+
+	protected void setWait(int waitLineNumber, String waitLineMsg){
+		this.waitLineNumber = waitLineNumber;
+		this.waitLineMsg = waitLineMsg;
 	}
 	
-	public void clear(){
+	private int getQueLineSize(){
+		Cmnd lastChild = this.getChildren().get(getChildren().size()-1);
+		while(lastChild.getChildren().size() > 0){
+			lastChild = lastChild.getChildren().get(lastChild.getChildren().size()-1);
+		}
+		return lastChild.lineNumber - lineNumber;
 	}
 
 	public void bang(CMsgShuttle _msg) {

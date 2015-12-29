@@ -36,6 +36,23 @@ import ch.maybites.tools.Debugger;
  *
  */
 public class QSManager implements OutputInterface{
+	// info messages //
+	
+	// QueList -  for filling the que selection menu
+	private final String QUELIST = "quelist";
+	private final String QUELIST_START = "start";
+	private final String QUELIST_NAME = "name";
+	private final String QUELIST_DONE = "done";
+	private final String QUELIST_STOP = "stop";
+	private final String QUELIST_PLAY = "play";
+	
+	// Script - shows current running ques and their position
+	private final String SCRIPT = "script";
+
+	private final String PARSING = "parsing";
+	private final String PARSING_OK = "ok";
+	private final String PARSING_ERROR = "error";
+	
 	private static String SCHEMA_FILENAME = "/queListSchema.xsd";
 	
 	private ArrayList<CMsgTrigger> triggerQueue;
@@ -134,7 +151,18 @@ public class QSManager implements OutputInterface{
 
 		if(viewplayingquesFreq > 0 && lastviewTime + (1000 / viewplayingquesFreq) < timer ){
 			lastviewTime = timer;
-			outputInfoMsg(QueMsgFactory.getMsg("playtime").add(System.currentTimeMillis() - timer).done());
+			int outCounter = 0;
+			outputInfoMsg(QueMsgFactory.getMsg(SCRIPT).add("playtime").add(System.currentTimeMillis() - timer).done());
+			for(Cmnd child: myScript.getChildren()){
+				CmndQue q = (CmndQue)child;
+				if(q.isPlaying){
+					outputInfoMsg(QueMsgFactory.getMsg(SCRIPT).add(outCounter).add(q.scriptLineSize).add(q.waitLineNumber - q.lineNumber).add("que("+q.queName+") "+q.waitLineMsg).add(1).done());
+					outCounter++;
+				}
+			}
+			for(int i = outCounter; i < 12; i++){
+				outputInfoMsg(QueMsgFactory.getMsg(SCRIPT).add(i).add(20).add(1).add("-").add(0).done());
+			}
 		}
 	}
 
@@ -208,13 +236,13 @@ public class QSManager implements OutputInterface{
 		String  firstQueName = null;
 		
 		try {			
-			InputStream is = new java.io.FileInputStream(_filepath);
-			Document document = PositionalXMLReader.readXML(is);
-
-		    // preparing the XML file as a SAX source
+		    // Validate Script against the XSD
 		    SAXSource source = new SAXSource(new InputSource(new java.io.FileInputStream(_filepath)));
-
 		    validator.validate(source);
+
+		    // Load the Script and make it accessible for building
+		    InputStream is = new java.io.FileInputStream(_filepath);
+			Document document = PositionalXMLReader.readXML(is);
 			
 			document.getDocumentElement().normalize();	
 						
@@ -228,22 +256,23 @@ public class QSManager implements OutputInterface{
 				Debugger.error("QueScript", "loaded " +_filepath + " with " + myScript.getChildren().size() + " que's");
 			}
 											
-			outputInfoMsg(QueMsgFactory.getMsg("parsing").add("ok").done());
+			outputInfoMsg(QueMsgFactory.getMsg(PARSING).add(PARSING_OK).done());
 
 		} catch (SAXParseException e) {
 			Debugger.error("QueScript", "Error at line[" + e.getLineNumber() + 
 					"] col[" + e.getColumnNumber() + "]: " + 
 					e.getMessage().substring(e.getMessage().indexOf(":")+1));
-			outputInfoMsg(QueMsgFactory.getMsg("parsing").add("error").add("line").add("line[" + e.getLineNumber() + "] col[" + e.getColumnNumber() + "]").done());
+			outputInfoMsg(QueMsgFactory.getMsg(PARSING).add(PARSING_ERROR).add(e.getMessage().substring(e.getMessage().indexOf(":")+1) + " at line(" + e.getLineNumber() + ") col(" + e.getColumnNumber() + ")").done());
 			return;
 
 		} catch (ScriptMsgException e) {
 			Debugger.error("QueScript", "Error: " + e.getMessage());
-			outputInfoMsg(QueMsgFactory.getMsg("parsing").add("error").add("unknown").add(e.getMessage()).done());
+			outputInfoMsg(QueMsgFactory.getMsg(PARSING).add(PARSING_ERROR).add(e.getMessage()).done());
 			return;
 
 		} catch (Exception e) {
 			Debugger.error("QueScript", "DocumentBuilder Exceptions:" + e.getMessage());
+			outputInfoMsg(QueMsgFactory.getMsg(PARSING).add(PARSING_ERROR).add(e.getMessage()).done());
 			e.printStackTrace();
 			return;
 		}
@@ -252,13 +281,13 @@ public class QSManager implements OutputInterface{
 		if(autostart){
 			play(firstQueName);
 		}
-		
-		outputInfoMsg(QueMsgFactory.getMsg("quelist").done());
+				
+		outputInfoMsg(QueMsgFactory.getMsg(QUELIST).add(QUELIST_START).done());
 		for(Cmnd e: myScript.getChildren()){
 			CmndQue _next = (CmndQue)e;
-			outputInfoMsg(QueMsgFactory.getMsg("que").add(_next.getQueName()).done());
+			outputInfoMsg(QueMsgFactory.getMsg(QUELIST).add(QUELIST_NAME).add(_next.getQueName()).done());
 		}
-		outputInfoMsg(QueMsgFactory.getMsg("quelistdone").done());
+		outputInfoMsg(QueMsgFactory.getMsg(QUELIST).add(QUELIST_DONE).done());
 		
 		fileName = _filepath;
 	}
@@ -284,6 +313,8 @@ public class QSManager implements OutputInterface{
 	}
 	
 	public void play(String _queName){
+		outputInfoMsg(QueMsgFactory.getMsg(QUELIST).add(QUELIST_PLAY).add(_queName).done());
+
 		if(myScript.hasQue(_queName)){
 			if(debugMode)
 				Debugger.verbose("QueScript", "play... :" + _queName);	
@@ -421,6 +452,8 @@ public class QSManager implements OutputInterface{
 	 * Stop all ques
 	 */
 	public void stop(){
+		outputInfoMsg(QueMsgFactory.getMsg(QUELIST).add(QUELIST_STOP).done());
+
 		if(debugMode)
 			Debugger.verbose("QueScript", "stoping all...");	
 		for(Cmnd e: myScript.getChildren()){

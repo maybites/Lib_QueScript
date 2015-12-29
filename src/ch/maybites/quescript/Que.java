@@ -33,12 +33,15 @@ public class Que extends MaxObject implements OutputConnector{
 		QueMsgFactory.setMsgTypeToMax();
 	}
 	
+	public void loadbang(){
+		queManager.registerConnector(this);
+	}
+	
 	/**
 	 * read script file
 	 * @param _fileName
 	 */
 	public void read(String _fileName){
-		queManager.registerConnector(this);
 		queManager.load(_fileName);
 	}
 	

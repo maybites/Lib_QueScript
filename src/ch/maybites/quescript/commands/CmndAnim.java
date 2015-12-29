@@ -276,4 +276,13 @@ public class CmndAnim extends Cmnd {
 			executionTime.add(_timePassed);
 		}
 	}
+	
+	public void clear(){
+		if(valueInterolators != null)
+			valueInterolators.clear();
+		for(Cmnd child: getChildren()){
+			child.clear();
+		}
+	}
+
 }

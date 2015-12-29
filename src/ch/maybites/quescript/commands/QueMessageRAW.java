@@ -59,6 +59,13 @@ public abstract class QueMessageRAW implements QueMessage{
 		return this;
 	}
 	
+	protected void clear(){
+		if(tempList != null)
+			tempList.clear();
+		if(evalList != null)
+			evalList.clear();
+	}
+	
 	/**
 	 * Calling this method requires to call eval() beforehand
 	 * @param cmdName

@@ -91,4 +91,8 @@ public class QueMessageAtom extends QueMessageRAW{
 		return cmnd;
 	}
 
+	protected void clear(){
+		super.clear();
+	}
+
 }
