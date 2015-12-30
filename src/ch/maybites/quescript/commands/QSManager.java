@@ -497,7 +497,7 @@ public class QSManager implements OutputInterface{
 		}
 	}
 
-	public void viewplayingques(int _frequency){
+	public void progressupdate(int _frequency){
 		viewplayingquesFreq = _frequency;
 	}
 

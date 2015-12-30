@@ -90,8 +90,8 @@ public class Que extends MaxObject implements OutputConnector{
 	 * frame takes in milliseconds.
 	 * @param _frequency the number of updates per second.
 	 */
-	public void viewplayingques(int _frequency){
-		queManager.viewplayingques(_frequency);
+	public void progressupdate(int _frequency){
+		queManager.progressupdate(_frequency);
 	}
 	
 	/**
