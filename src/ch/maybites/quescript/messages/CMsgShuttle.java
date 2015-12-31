@@ -20,6 +20,8 @@ public class CMsgShuttle {
 	
 	boolean hasTimer = false;
 	
+	public long deltaFrameTime;
+	
 	Cmnd lockingObject = null;
 	
 	ArrayList<CMsgInterface> msgs;
@@ -75,7 +77,9 @@ public class CMsgShuttle {
 	 */
 	public void frameBang(RunTimeEnvironment rt){
 		Calendar md = Calendar.getInstance();
-		frameTime = new CMsgTime(md);
+		CMsgTime newFrameTime =  new CMsgTime(md);
+		deltaFrameTime = newFrameTime.getTotalMillis() - frameTime.getTotalMillis();
+		frameTime = newFrameTime;
 		nodesInShutdown = 0;
 		if(hasTimer()){
 			rt.setVariable("$TIMER", frameTime.getTotalMillis() - timerTime.getTotalMillis());
@@ -288,6 +292,14 @@ public class CMsgShuttle {
 	public boolean hasAnimMessage(String _ramp){
 		for(CMsgInterface msg: msgs){
 			if(msg.isAnim(_ramp))
+				return true;
+		}
+		return false;
+	}
+
+	public boolean hasFadedMessage(String _ramp){
+		for(CMsgInterface msg: msgs){
+			if(msg.isFadedOut(_ramp))
 				return true;
 		}
 		return false;

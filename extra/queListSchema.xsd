@@ -51,6 +51,7 @@
 <xs:attribute name="trigger" type="xs:string"/> 
 <xs:attribute name="countdown" type="xs:string"/> 
 <xs:attribute name="anim" type="xs:string"/> 
+<xs:attribute name="faded" type="xs:string"/> 
 <xs:attribute name="ramp" type="xs:string"/> 
 <xs:attribute name="remote" type="xs:string"/> 
 <xs:attribute name="while" type="xs:string"/> 
@@ -143,6 +144,7 @@
 		<xs:attribute ref="trigger"/> 
 		<xs:attribute ref="countdown"/> 
 		<xs:attribute ref="anim"/> 
+		<xs:attribute ref="faded"/> 
 		<xs:attribute ref="ramp"/> 
 		<xs:attribute ref="while"/> 
 		<xs:attribute ref="until"/> 

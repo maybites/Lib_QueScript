@@ -53,6 +53,10 @@ public class CMsgTrigger implements CMsgInterface{
 		return false;
 	}
 
+	public boolean isFadedOut(String _name) {
+		return false;
+	}
+
 	public boolean isAnim(String _name) {
 		return false;
 	}

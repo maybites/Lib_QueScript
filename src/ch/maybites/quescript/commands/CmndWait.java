@@ -19,6 +19,7 @@ public class CmndWait extends Cmnd {
 	private static String ATTR_TRIGGER = "trigger";
 	private static String ATTR_COUNTDOWN = "countdown";
 	private static String ATTR_ANIM = "anim";
+	private static String ATTR_FADED = "faded";
 	private static String ATTR_TIMER = "timer";
 	private static String ATTR_COMPLEX = "complex";
 	private static String ATTR_WHILE = "while";
@@ -35,6 +36,7 @@ public class CmndWait extends Cmnd {
 	private final int MODE_WHILE 		= 7;
 	private final int MODE_UNTIL 		= 8;
 	private final int MODE_RAMP 		= 9;
+	private final int MODE_FADED 		= 10;
 	
 	private int mode = -1;
 	
@@ -80,6 +82,8 @@ public class CmndWait extends Cmnd {
 					mode = MODE_RAMP;
 				} else if(smode.equals(ATTR_ANIM)){
 					mode = MODE_ANIM;
+				} else if(smode.equals(ATTR_FADED)){
+					mode = MODE_FADED;
 				} else if(smode.equals(ATTR_UNTIL)){
 					mode = MODE_UNTIL;
 					untilWhileCondition = new Expression(getAttributeValue(ATTR_UNTIL), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(rt);
@@ -155,6 +159,10 @@ public class CmndWait extends Cmnd {
 			if(_msg.hasAnimMessage(getAttributeValue(ATTR_ANIM)))
 				return true;
 			break;
+		case MODE_FADED:
+			if(_msg.hasFadedMessage(getAttributeValue(ATTR_FADED)))
+				return true;
+			break;
 		case MODE_RAMP:
 			if(_msg.hasAnimMessage(getAttributeValue(ATTR_RAMP)))
 				return true;
@@ -210,6 +218,9 @@ public class CmndWait extends Cmnd {
 			break;
 		case MODE_ANIM:
 			ret = ATTR_ANIM + "='" + getAttributeValue(ATTR_ANIM) + "'";
+			break;
+		case MODE_FADED:
+			ret = ATTR_FADED + "='" + getAttributeValue(ATTR_FADED) + "'";
 			break;
 		case MODE_TIMER:
 			ret = ATTR_TIMER + "='" + getAttributeValue(ATTR_TIMER) + "'";

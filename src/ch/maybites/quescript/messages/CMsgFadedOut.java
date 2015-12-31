@@ -1,9 +1,9 @@
 package ch.maybites.quescript.messages;
 
-public class CMsgAnim implements CMsgInterface{
+public class CMsgFadedOut implements CMsgInterface{
 	String ramp;
 	
-	public CMsgAnim(String _ramp){
+	public CMsgFadedOut(String _ramp){
 		ramp = _ramp;
 	}
 
@@ -16,11 +16,11 @@ public class CMsgAnim implements CMsgInterface{
 	}
 
 	public boolean isFadedOut(String _name) {
-		return false;
+		return (ramp.equals(_name)?true:false);
 	}
 
 	public boolean isAnim(String _name) {
-		return (ramp.equals(_name)?true:false);
+		return false;
 	}
 
 	public boolean isStop() {

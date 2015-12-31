@@ -45,6 +45,7 @@ public abstract class Cmnd{
 		attributes = new HashMap<String, String>();
 		children = new ArrayList<Cmnd>();
 		content = null;
+		lineNumber = -1;
 	}
 
 	public OutputInterface getOutput(){

@@ -1,6 +1,8 @@
 package ch.maybites.quescript.commands;
 
+import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.messages.CMsgShuttle;
+import ch.maybites.quescript.messages.ScriptMsgException;
 
 public class CmndScript extends Cmnd{
 	public static String NODE_NAME = "script";
@@ -12,6 +14,14 @@ public class CmndScript extends Cmnd{
 		super.setCmndName(NODE_NAME);
 	}
 	
+	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
+		for(Cmnd child: getChildren()){
+			CmndQue que = (CmndQue)child;
+			if(que.prt == null)
+				child.setup(rt);
+		}
+	}
+
 	public void setOutput(OutputInterface output){
 		this.output = output;
 	}

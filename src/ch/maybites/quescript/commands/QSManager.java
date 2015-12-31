@@ -224,10 +224,12 @@ public class QSManager implements OutputInterface{
 	public void load(String _filepath){
 		myScript.setOutput(this);
 
-		// before loading the new ques, all ques that are not playing will be removed
+		// before loading the new ques, que will be removed if
+		//  ->  ques are not playing
+		//  ->  if the same script is loaded again
 		for(Iterator<Cmnd> e = myScript.getChildren().iterator(); e.hasNext();){
 			CmndQue que = (CmndQue)e.next();
-			if(!que.isPlaying){
+			if(!que.isPlaying || _filepath.equals(fileName)){
 				que.clear();
 				e.remove();
 			}

@@ -152,6 +152,16 @@ public class CMsgTime {
 		diffMills -= _time.getTotalMillis();
 		return this;
 	}
+
+	/**
+	 * Subtracts the _milliseconds from this instance and returns it
+	 * @param _milliseconds
+	 * @return
+	 */
+	public CMsgTime subtract(long _milliseconds){
+		diffMills -= _milliseconds;
+		return this;
+	}
 	
 	public CMsgTime clone(){
 		try {

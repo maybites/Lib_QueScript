@@ -44,6 +44,10 @@ public class CMsgFade implements CMsgInterface{
 		return true;
 	}
 
+	public boolean isFadedOut(String _name) {
+		return false;
+	}
+
 	public boolean isAnim(String _name) {
 		return false;
 	}

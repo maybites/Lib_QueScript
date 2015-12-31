@@ -30,6 +30,10 @@ public class CMsgStop implements CMsgInterface{
 		return false;
 	}
 
+	public boolean isFadedOut(String _name) {
+		return false;
+	}
+
 	public boolean isStop() {
 		return true;
 	}

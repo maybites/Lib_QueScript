@@ -9,6 +9,8 @@ public interface CMsgInterface {
 	public boolean isFade();
 	
 	public boolean isAnim(String _name);
+
+	public boolean isFadedOut(String _name);
 	
 	public boolean isStop();
 

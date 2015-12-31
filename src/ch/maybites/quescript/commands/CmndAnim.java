@@ -10,6 +10,7 @@ import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.expression.Expression.ExpressionException;
 import ch.maybites.quescript.messages.CMsgAnim;
 import ch.maybites.quescript.messages.CMsgFade;
+import ch.maybites.quescript.messages.CMsgFadedOut;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.CMsgTime;
 import ch.maybites.quescript.messages.ScriptMsgException;
@@ -168,7 +169,7 @@ public class CmndAnim extends Cmnd {
 					setFade2Mode(runMode);
 					palindromDirection = false;
 
-					executionTime = _msg.getFrameTime();
+					executionTime = _msg.getFrameTime().subtract(_msg.deltaFrameTime);
 //					Debugger.info("Script - Command <ramp> shutdown", "set execution time("+executionTime.print()+")");			
 				}
 
@@ -190,7 +191,7 @@ public class CmndAnim extends Cmnd {
 			setFade2Mode(runMode);
 			palindromDirection = false;
 			
-			executionTime = _msg.getFrameTime();
+			executionTime = _msg.getFrameTime().subtract(_msg.deltaFrameTime);
 //			Debugger.info("Script - Command <ramp> fade", "set execution time("+executionTime.print()+")");			
 						
 			CMsgFade fade = _msg.getFadeMessage(name);
@@ -231,6 +232,7 @@ public class CmndAnim extends Cmnd {
 				switch(runMode){
 				case EXECUTE_FADEOUT:
 					runMode = EXECUTE_OFF;
+					_msg.addMessage(new CMsgFadedOut(name));
 					break;
 				case EXECUTE:
 					runMode = (fadeoutTime != null)? EXECUTE_PAUSE: EXECUTE_OFF;
