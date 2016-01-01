@@ -43,6 +43,9 @@ public class CmndWait extends Cmnd {
 	private CMsgTime myTime;
 	private CMsgTime myCountdown;
 	
+	private boolean isComplexChild = false;
+	protected boolean complexResult = false;
+	
 	private ExpressionVar untilWhileCondition = null;
 
 	public CmndWait(Cmnd _parentNode){
@@ -53,6 +56,8 @@ public class CmndWait extends Cmnd {
 	public void build(Node _xmlNode) throws ScriptMsgException{
 		super.build(_xmlNode);
 
+		if(parentNode instanceof CmndWait)
+			isComplexChild = true;
 	}
 
 	/**
@@ -117,11 +122,19 @@ public class CmndWait extends Cmnd {
 				myCountdown = null;
 			}
 			if(!_msg.isWaitLocked()){
+				//if it is a complex wait and it has other waits as children, it
+				// resets their result memory
+				for(Cmnd child : getChildren()){
+					if(child.isCmndName(NODE_NAME)){
+						CmndWait w = (CmndWait) child;
+						w.complexResult = false;
+					}
+				}
 				_msg.lockWaitLock(this);
 				getQue().setWait(lineNumber, getMainAttribute());
 			}
 			if(_msg.isWaitLockedBy(this)){
-				if(logic(_msg)){
+				if(checkLogic(_msg)){
 					for(Cmnd child : getChildren()){
 						if(!child.isCmndName(NODE_NAME))
 							child.bang(_msg);
@@ -142,8 +155,14 @@ public class CmndWait extends Cmnd {
 		}
 		return (CmndQue)myParent;
 	}
+	
+	protected boolean checkLogic(CMsgShuttle _msg){
+		if(isComplexChild && complexResult)
+			return complexResult;
+		return complexResult = logic(_msg);
+	}
 
-	protected boolean logic(CMsgShuttle _msg){
+	private boolean logic(CMsgShuttle _msg){
 		switch(mode){
 		case MODE_COMPLEX:
 			if(ifCondition(_msg))
@@ -253,7 +272,7 @@ public class CmndWait extends Cmnd {
 		int conditionCounter = 0;
 		for(Cmnd child : getChildren()){
 			if(child.isCmndName(NODE_NAME)){
-				conditionAdder += ((((CmndWait)child).logic(_msg))? 1: 0);
+				conditionAdder += ((((CmndWait)child).checkLogic(_msg))? 1: 0);
 				conditionCounter++;
 			}
 		}
