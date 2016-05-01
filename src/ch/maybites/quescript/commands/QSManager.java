@@ -203,14 +203,16 @@ public class QSManager implements OutputInterface{
 						resume(cmd[2]);
 					}
 				}else if(cmd[0].equals(CmndMessage.NODE_NAME_TRIGGER)){
-					if(cmd.length == 3){ // 
-						trigger(cmd[2], null);
-					} else if(cmd.length > 3){
-						String[] args = new String[cmd.length - 3];
-						for(int i = 3; i < cmd.length; i++){
-							args[i - 3] = cmd[i];
+					// the structure of the internal message is:
+					// 'trigger' <quename> 'trigger' <triggername> (<arg> <arg> etc)
+					if(cmd.length == 4){ // 
+						trigger(cmd[3], null);
+					} else if(cmd.length > 4){
+						String[] args = new String[cmd.length - 4];
+						for(int i = 4; i < cmd.length; i++){
+							args[i - 4] = cmd[i];
 						}
-						trigger(cmd[2], args);
+						trigger(cmd[3], args);
 					}
 				}
 			}
