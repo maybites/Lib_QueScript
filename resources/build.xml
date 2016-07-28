@@ -110,7 +110,7 @@ ${line}
 	  	<antcall target="generate.javadoc" />
 		<antcall target="generate.libprops" />
 		<antcall target="copyToMaxPackage"><param name="folder" value="library"/></antcall>
-		<antcall target="copyToSparckPackage"><param name="folder" value="bin"/></antcall>
+		<antcall target="copyToSparckPackage"><param name="folder" value="library"/></antcall>
 		<antcall target="copyToSketchbook"><param name="folder" value="libraries"/></antcall>
 		<antcall target="generate.distribution" />
 		<antcall target="generate.install.library" />
@@ -126,17 +126,22 @@ ${line}
 	</target>
 	
 	<target name="copyToMaxPackage">
-		<property name="libprops.destination" location="${maybites.quescript.package.location}/java-classes"/>
+		<property name="libprops.destination" location="${maybites.quescript.package.location}/java-classes/lib"/>
 		<copy file="${project.tmp}/${project.name}/${folder}/${project.jar.name}" todir="${libprops.destination}" />
 	</target>
 
 	<target name="copyToSparckPackage">
-		<property name="libprops.destination" location="${maybites.sparck.export.dir}/QueScript"/>
+		<property name="libprops.destination" location="${maybites.sparck.export.dir}/lib"/>
 		<copy todir="${libprops.destination}">
+			<!--
 			 <fileset dir="${folder}"/>
 			<fileset dir="extra">
 				<include name="queListSchema.xsd" />
 			</fileset>
+			-->
+			<resources>
+			  <file file="${project.tmp}/${project.name}/${folder}/${project.jar.name}"/>
+			</resources>
 		</copy>	
 	</target>
 		
