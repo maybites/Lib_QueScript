@@ -37,7 +37,7 @@ public class CmndVar extends Cmnd {
 		try {
 			varValue = new Expression(super.content, "{", "}").setInfo(" at line(" + lineNumber + ")").parse(rt);
 		} catch (ExpressionException e) {
-			throw new ScriptMsgException("QueScript - Command <expr>: Value Expression: " + e.getMessage());
+			throw new ScriptMsgException("QueScript - Command <var>: Value Expression: " + e.getMessage());
 		}
 		
 		name = getAttributeValue(ATTR_NAME);
@@ -47,7 +47,7 @@ public class CmndVar extends Cmnd {
 			rt.setGlobalVariable(name, new ExpressionVar());
 
 		if(debugMode)
-			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+"created expr-Comnd = "+ super.content);	
+			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+"created var-Comnd = "+ super.content);	
 
 	}
 
@@ -61,7 +61,7 @@ public class CmndVar extends Cmnd {
 		try {
 			prt.setGlobalVariable(name, varValue.eval());
 		} catch (ExpressionException e) {
-			Debugger.error("QueScript que("+parentNode.getQueName()+") - Command <expr>: Value Expression", e.getMessage());
+			Debugger.error("QueScript que("+parentNode.getQueName()+") - Command <var>: Value Expression", e.getMessage());
 		}
 	}
 

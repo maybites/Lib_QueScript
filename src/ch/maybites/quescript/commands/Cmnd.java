@@ -121,6 +121,8 @@ public abstract class Cmnd{
 						child = new CmndIf(this);
 					else if(childName.equals(CmndElse.NODE_NAME))
 						child = new CmndElse(this);
+					else if(childName.equals(CmndVar.NODE_NAME))
+						child = new CmndVar(this);
 					else if(childName.equals(CmndDebugger.NODE_NAME))
 						child = new CmndDebugger(this);
 					else if(childName.equals(CmndFade.NODE_NAME))
