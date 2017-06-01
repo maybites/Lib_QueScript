@@ -58,6 +58,19 @@ public class CmndScript extends Cmnd{
 		return null;
 	}
 	
+	/**
+	 * Checks if this Script has a playing que
+	 * @return true if one of its ques is playing
+	 */
+	public boolean hasQuePlaying(){
+		for(Cmnd q: getChildren()){
+			CmndQue que = (CmndQue) q;
+			if(que.isPlaying)
+				return true;
+		}
+		return false;
+	}
+	
 	@Override
 	public void bang(CMsgShuttle _msg) {
 		// TODO Auto-generated method stub

@@ -68,7 +68,7 @@ public class QSManager implements OutputInterface{
 	
 	private long lastviewTime = 0;
 
-	private String fileName;
+	private String fileName = null;
 
 	private RunTimeEnvironment globalExprEnvironment;
 	
@@ -506,8 +506,25 @@ public class QSManager implements OutputInterface{
 	}
 
 
+	/**
+	 * Starts first que if a script is loaded and no que is playing.
+	 * @param _autostart
+	 */
 	public void autostart(int _autostart){
 		autostart = (_autostart == 1)? true: false;
+		if(fileName != null){
+			if(!myScript.hasQuePlaying()){
+				if(!myScript.getChildren().isEmpty()){
+					String firstQueName = ((CmndQue)myScript.getChildren().get(0)).getQueName();
+					play(firstQueName);
+					Debugger.info("QueScript", "autostarted: " + firstQueName);
+				} else {
+					Debugger.warning("QueScript", "autostart failed due to missing que in script.");
+				}
+			} else {
+				Debugger.warning("QueScript", "autostart didnt start first que due to already playing ques.");
+			}
+		}
 	}
 	
 	public void trigger(String _triggerName, String[] args){
