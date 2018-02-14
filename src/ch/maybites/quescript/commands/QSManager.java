@@ -48,6 +48,7 @@ public class QSManager implements OutputInterface{
 	
 	// Script - shows current running ques and their position
 	private final String SCRIPT = "script";
+	private final String FRAMEDONE = "framedone";
 
 	private final String PARSING = "parsing";
 	private final String PARSING_OK = "ok";
@@ -164,6 +165,7 @@ public class QSManager implements OutputInterface{
 				outputInfoMsg(QueMsgFactory.getMsg(SCRIPT).add(i).add(20).add(1).add("-").add(0).done());
 			}
 		}
+		//outputInfoMsg(QueMsgFactory.getMsg(FRAMEDONE).done());
 	}
 
 	public void executeInternalMessages(){

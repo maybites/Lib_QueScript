@@ -39,8 +39,8 @@ public class CmndMessage extends Cmnd {
 
 		if(this.hasAttributeValue(ATTR_SENDTO)){
 			sendto = getAttributeValue(ATTR_SENDTO);
-			myMessage.addSendTo(sendto);
 		}	
+		myMessage.addSendTo(sendto);
 	}
 	
 	private void parseContentString(String _content, RunTimeEnvironment rt) throws ExpressionException{
