@@ -37,10 +37,13 @@ public class CmndMessage extends Cmnd {
 
 		myMessage = QueMsgFactory.getMsg(this.cmdName);
 
-		if(this.hasAttributeValue(ATTR_SENDTO)){
-			sendto = getAttributeValue(ATTR_SENDTO);
-		}	
-		myMessage.addSendTo(sendto);
+		if(super.cmdName.equals(NODE_NAME_OSC)){
+			// only the OSC message has an sendto attribute
+			if(this.hasAttributeValue(ATTR_SENDTO)){
+				sendto = getAttributeValue(ATTR_SENDTO);
+			}
+			myMessage.addSendTo(sendto);
+		}
 	}
 	
 	private void parseContentString(String _content, RunTimeEnvironment rt) throws ExpressionException{
