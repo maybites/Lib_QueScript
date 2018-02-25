@@ -74,12 +74,12 @@ public class CmndDebugger extends Cmnd {
 			getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("DEBUGGER " + name).done());
 			getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("------------------").done());
 				
-			int levels = prt.getDomainLevels();
+			int levels = prt.getScopeLevels();
 			int currnt;
 			for(int i = (levels - 1); i >= 0; i--){	
 				currnt = levels  - 1 - i;
 				if(showVarDomain >= currnt){
-					HashMap<String, ExpressionVar> global = (HashMap<String, ExpressionVar>) prt.getDomain(i);
+					HashMap<String, ExpressionVar> global = (HashMap<String, ExpressionVar>) prt.getScope(i);
 					getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("Variables inside Domain:").add(currnt).done());
 					it = global.keySet().iterator();
 					while(it.hasNext()){

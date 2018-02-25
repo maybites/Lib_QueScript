@@ -1,5 +1,8 @@
 package ch.maybites.quescript.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.ScriptMsgException;
@@ -7,18 +10,24 @@ import ch.maybites.quescript.messages.ScriptMsgException;
 public class CmndScript extends Cmnd{
 	public static String NODE_NAME = "script";
 	
+	/** list with only que nodes */
+	private ArrayList<Cmnd> queChildren;
+
 	OutputInterface output;
 
 	public CmndScript() {
 		super(null);
+		queChildren = new ArrayList<Cmnd>();
 		super.setCmndName(NODE_NAME);
 	}
 	
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
-		for(Cmnd child: getChildren()){
-			CmndQue que = (CmndQue)child;
-			if(que.prt == null)
-				child.setup(rt);
+		queChildren.clear();
+		for(Cmnd child: this.getChildren()){
+			child.setup(rt);
+			if(child.cmdName.equals(CmndQue.NODE_NAME)){
+				queChildren.add(child);
+			}
 		}
 	}
 
@@ -31,12 +40,20 @@ public class CmndScript extends Cmnd{
 	}
 
 	/**
+	 * gets all this objects ques
+	 * @return
+	 */
+	public List<Cmnd> getQues(){
+		return queChildren;
+	}
+
+	/**
 	 * Checks if this Script has a Que of this name
 	 * @param queName
 	 * @return true if this is the case 
 	 */
 	public boolean hasQue(String queName){
-		for(Cmnd q: getChildren()){
+		for(Cmnd q: getQues()){
 			CmndQue que = (CmndQue) q;
 			if(que.getQueName().equals(queName))
 				return true;
@@ -50,10 +67,11 @@ public class CmndScript extends Cmnd{
 	 * @return the instance of the que
 	 */
 	public CmndQue getQue(String queName){
-		for(Cmnd q: getChildren()){
+		for(Cmnd q: getQues()){
 			CmndQue que = (CmndQue) q;
-			if(que.getQueName().equals(queName))
+			if(que.getQueName().equals(queName)){
 				return que;
+			}
 		}
 		return null;
 	}
@@ -63,10 +81,11 @@ public class CmndScript extends Cmnd{
 	 * @return true if one of its ques is playing
 	 */
 	public boolean hasQuePlaying(){
-		for(Cmnd q: getChildren()){
+		for(Cmnd q: getQues()){
 			CmndQue que = (CmndQue) q;
-			if(que.isPlaying)
+			if(que.isPlaying){
 				return true;
+			}
 		}
 		return false;
 	}

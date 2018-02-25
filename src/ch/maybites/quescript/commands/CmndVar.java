@@ -34,36 +34,33 @@ public class CmndVar extends Cmnd {
 	 */
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
 		prt = rt;
-		try {
-			varValue = new Expression(super.content, "{", "}").setInfo(" at line(" + lineNumber + ")").parse(rt);
-		} catch (ExpressionException e) {
-			throw new ScriptMsgException("QueScript - Command <var>: Value Expression: " + e.getMessage());
+		if(super.content != null){
+			try {
+				varValue = new Expression(super.content, "{", "}").setInfo(" at line(" + lineNumber + ")").parse(rt);
+			} catch (ExpressionException e) {
+				throw new ScriptMsgException("QueScript - Command <var>: Value Expression: " + e.getMessage());
+			}
+			
+			name = getAttributeValue(ATTR_NAME);
+
+			// if no global variable of this name exists, create one with value NULL
+			try {
+				prt.setVariable(name, varValue.eval());
+			} catch (ExpressionException e) {
+				Debugger.error("QueScript que("+parentNode.getQueName()+") - Command <var>: Value Expression", e.getMessage());
+			}
+
+			if(debugMode)
+				Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+"created var-Comnd = "+ super.content);	
+			
+		} else {
+			throw new ScriptMsgException("QueScript - Command <var>: Expression missing at line(" + lineNumber + ")");			
 		}
-		
-		name = getAttributeValue(ATTR_NAME);
-
-		// if no global variable of this name exists, create one with value NULL
-		if(!rt.containsGlobalVar(name))
-			rt.setGlobalVariable(name, new ExpressionVar());
-
-		if(debugMode)
-			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+"created var-Comnd = "+ super.content);	
-
 	}
 
-	public void bang(CMsgShuttle _msg) {
-		if(!_msg.isWaitLocked()){
-			lockLessBang(_msg);
-		}
-	}
+	public void bang(CMsgShuttle _msg) {;}
 	
-	public void lockLessBang(CMsgShuttle _msg){
-		try {
-			prt.setGlobalVariable(name, varValue.eval());
-		} catch (ExpressionException e) {
-			Debugger.error("QueScript que("+parentNode.getQueName()+") - Command <var>: Value Expression", e.getMessage());
-		}
-	}
+	public void lockLessBang(CMsgShuttle _msg){;}
 
 	public void resume(long _timePassed) {;}
 

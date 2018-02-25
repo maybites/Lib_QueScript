@@ -129,23 +129,19 @@ public class QSManager implements OutputInterface{
 		// and then keep on going
 
 		Calendar md = Calendar.getInstance();
-		globalExprEnvironment.setGlobalVariable("$HOUR", md.get(Calendar.HOUR_OF_DAY));
-		globalExprEnvironment.setGlobalVariable("$MIN", md.get(Calendar.MINUTE));
-		globalExprEnvironment.setGlobalVariable("$SEC", md.get(Calendar.SECOND));
-		globalExprEnvironment.setGlobalVariable("$MILLI", md.get(Calendar.MILLISECOND));
-
-		// all the que's receive a bang message, since some of them might still be in shutdown mode
-		CmndQue nextElement;
+		globalExprEnvironment.setVariable("$HOUR", md.get(Calendar.HOUR_OF_DAY));
+		globalExprEnvironment.setVariable("$MIN", md.get(Calendar.MINUTE));
+		globalExprEnvironment.setVariable("$SEC", md.get(Calendar.SECOND));
+		globalExprEnvironment.setVariable("$MILLI", md.get(Calendar.MILLISECOND));
 		
 		// make sure that no concurrent triggers get lost.
 		triggerQueCopy = triggerQueue;
 		if(triggerQueue.size() > 0)
 			triggerQueue = new ArrayList<CMsgTrigger>();
 
-		for(Cmnd e: myScript.getChildren()){
-			nextElement = (CmndQue)e;
+		for(Cmnd e: myScript.getQues()){
 //			Debugger.verbose("QueScript", "banging...: " + nextElement.getQueName());	
-			nextElement.bang(triggerQueCopy);
+			((CmndQue)e).bang(triggerQueCopy);
 //			Debugger.verbose("QueScript", "... banged: " + nextElement.getQueName());	
 		}
 		triggerQueue.clear();
@@ -232,9 +228,16 @@ public class QSManager implements OutputInterface{
 		//  ->  ques are not playing
 		//  ->  if the same script is loaded again
 		for(Iterator<Cmnd> e = myScript.getChildren().iterator(); e.hasNext();){
-			CmndQue que = (CmndQue)e.next();
-			if(!que.isPlaying || _filepath.equals(fileName)){
-				que.clear();
+			Cmnd cmd = e.next();
+			if(cmd.cmdName.equals(CmndQue.NODE_NAME)){
+				// everything that is a que will be tested
+				CmndQue que = (CmndQue)cmd;
+				if(!que.isPlaying || _filepath.equals(fileName)){
+					que.clear();
+					e.remove();
+				}
+			} else {
+				// everything else will be removed (var - nodes)
 				e.remove();
 			}
 		}
@@ -255,8 +258,8 @@ public class QSManager implements OutputInterface{
 			myScript.build(document.getFirstChild());
 			myScript.setup(globalExprEnvironment);
 			
-			if(!myScript.getChildren().isEmpty()){
-				firstQueName = ((CmndQue)myScript.getChildren().get(0)).getQueName();
+			if(!myScript.getQues().isEmpty()){
+				firstQueName = ((CmndQue)myScript.getQues().get(0)).getQueName();
 				Debugger.info("QueScript", "loaded " +_filepath + " with " + myScript.getChildren().size() + " que's");
 			} else {
 				Debugger.error("QueScript", "loaded " +_filepath + " with " + myScript.getChildren().size() + " que's");
@@ -289,8 +292,8 @@ public class QSManager implements OutputInterface{
 		}
 				
 		outputInfoMsg(QueMsgFactory.getMsg(QUELIST).add(QUELIST_START).done());
-		for(Cmnd e: myScript.getChildren()){
-			CmndQue _next = (CmndQue)e;
+		for(int i = myScript.getQues().size() - 1; i >= 0; i--){
+			CmndQue _next = (CmndQue)myScript.getQues().get(i);
 			outputInfoMsg(QueMsgFactory.getMsg(QUELIST).add(QUELIST_NAME).add(_next.getQueName()).done());
 		}
 		outputInfoMsg(QueMsgFactory.getMsg(QUELIST).add(QUELIST_DONE).done());
@@ -299,15 +302,19 @@ public class QSManager implements OutputInterface{
 	}
 
 	public void var(String name, double value){
-		globalExprEnvironment.setGlobalVariable(name, value);
+		if(globalExprEnvironment.containsVar(name)){
+			globalExprEnvironment.setVariable(name, value);
+		}
 	}
 	
 	public void var(String name, String value){
-		globalExprEnvironment.setGlobalVariable(name, value);
+		if(globalExprEnvironment.containsVar(name)){
+			globalExprEnvironment.setVariable(name, value);
+		}
 	}
 	
 	public void clearGlobalVars(){
-		globalExprEnvironment.clearGlobalVariables();
+		globalExprEnvironment.clearVariables();
 	}
 	
 	public void reset(){
@@ -336,7 +343,7 @@ public class QSManager implements OutputInterface{
 	public void shutdown(){
 		if(debugMode)
 			Debugger.verbose("QueScript", "shuting down... : all");	
-		for(Cmnd e: myScript.getChildren()){
+		for(Cmnd e: myScript.getQues()){
 			((CmndQue)e).shutDown();
 		}
 		if(debugMode)
@@ -348,7 +355,7 @@ public class QSManager implements OutputInterface{
 	 * @param _exception
 	 */
 	public void shutdown(String _name){
-		for(Cmnd e: myScript.getChildren()){
+		for(Cmnd e: myScript.getQues()){
 			CmndQue _next = (CmndQue)e;
 			if(_next.queName.equals(_name)){
 				if(debugMode)
@@ -365,7 +372,7 @@ public class QSManager implements OutputInterface{
 	 * @param _exceptionName
 	 */
 	public void shutDownExcept(String _exceptionName){
-		for(Cmnd e: myScript.getChildren()){
+		for(Cmnd e: myScript.getQues()){
 			CmndQue _next = (CmndQue)e;
 			if(!_next.queName.equals(_exceptionName)){
 				if(debugMode)
@@ -383,7 +390,7 @@ public class QSManager implements OutputInterface{
 	public void resume(){
 		if(debugMode)
 			Debugger.verbose("QueScript", "resume all executed que's");	
-		for(Cmnd e: myScript.getChildren()){
+		for(Cmnd e: myScript.getQues()){
 			((CmndQue)e).resume();
 		}
 		if(debugMode)
@@ -395,7 +402,7 @@ public class QSManager implements OutputInterface{
 	 * @param _name
 	 */
 	public void resume(String _name){
-		for(Cmnd e: myScript.getChildren()){
+		for(Cmnd e: myScript.getQues()){
 			CmndQue _next = (CmndQue)e;
 			if(_next.queName.equals(_name)){
 				if(debugMode)
@@ -413,7 +420,7 @@ public class QSManager implements OutputInterface{
 	public void pause(){
 		if(debugMode)
 			Debugger.verbose("QueScript", "pause all executed que's");	
-		for(Cmnd e: myScript.getChildren()){
+		for(Cmnd e: myScript.getQues()){
 			((CmndQue)e).pause();
 		}
 		if(debugMode)
@@ -425,7 +432,7 @@ public class QSManager implements OutputInterface{
 	 * @param _name
 	 */
 	public void pause(String _name){
-		for(Cmnd e: myScript.getChildren()){
+		for(Cmnd e: myScript.getQues()){
 			CmndQue _next = (CmndQue)e;
 			if(_next.queName.equals(_name)){
 				if(debugMode)
@@ -442,7 +449,7 @@ public class QSManager implements OutputInterface{
 	 * @param _exceptionName
 	 */
 	public void pauseExcept(String _exceptionName){
-		for(Cmnd e: myScript.getChildren()){
+		for(Cmnd e: myScript.getQues()){
 			CmndQue _next = (CmndQue)e;
 			if(!_next.queName.equals(_exceptionName)){
 				if(debugMode)
@@ -462,7 +469,7 @@ public class QSManager implements OutputInterface{
 
 		if(debugMode)
 			Debugger.verbose("QueScript", "stoping all...");	
-		for(Cmnd e: myScript.getChildren()){
+		for(Cmnd e: myScript.getQues()){
 			((CmndQue)e).stop();
 		}
 		if(debugMode)
@@ -474,7 +481,7 @@ public class QSManager implements OutputInterface{
 	 * @param _exception
 	 */
 	public void stop(String _name){
-		for(Cmnd e: myScript.getChildren()){
+		for(Cmnd e: myScript.getQues()){
 			CmndQue _next = (CmndQue)e;
 			if(_next.queName.equals(_name)){
 				if(debugMode)
@@ -491,7 +498,7 @@ public class QSManager implements OutputInterface{
 	 * @param _exceptionName
 	 */
 	public void stopExcept(String _exceptionName){
-		for(Cmnd e: myScript.getChildren()){
+		for(Cmnd e: myScript.getQues()){
 			CmndQue _next = (CmndQue)e;
 			if(!_next.queName.equals(_exceptionName)){
 				if(debugMode)
@@ -516,8 +523,8 @@ public class QSManager implements OutputInterface{
 		autostart = (_autostart == 1)? true: false;
 		if(fileName != null){
 			if(!myScript.hasQuePlaying()){
-				if(!myScript.getChildren().isEmpty()){
-					String firstQueName = ((CmndQue)myScript.getChildren().get(0)).getQueName();
+				if(!myScript.getQues().isEmpty()){
+					String firstQueName = ((CmndQue)myScript.getQues().get(0)).getQueName();
 					play(firstQueName);
 					Debugger.info("QueScript", "autostarted: " + firstQueName);
 				} else {

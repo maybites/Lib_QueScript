@@ -595,11 +595,13 @@ public class Expression {
 
 		Stack<ExpressionVar> stack = new Stack<ExpressionVar>();
 
-		int domainToken = 0;
+		int scopeToken = 0;
 				
 		for (String token : rpn) {
-			domainToken = getDomainAssignmentPrefix(token);
-			token = token.substring(domainToken);
+			scopeToken = hasScopePrefix(token);
+			if(scopeToken > 0){
+				token = token.substring(1);
+			}
 			if (rt.operators.containsKey(token)) {
 				ArrayList<ExpressionVar> p = new ArrayList<ExpressionVar>();
 				ExpressionVar v1 = stack.pop();
@@ -634,25 +636,38 @@ public class Expression {
 			} else if (rt.staticVars.containsKey(token)) {
 				stack.push(rt.staticVars.get(token));
 			} else if (rt.containsVar(token)) {
-				stack.push(rt.getVar(token));
+				if(scopeToken == 1){
+					// the ! forces to create / overwrite a variable in local scope, no
+					// matter if there is a variable in a higher scope
+					ExpressionVar newvar = new ExpressionVar();
+					rt.setLocalVariable(token, newvar);					
+					stack.push(newvar);					
+				} else {
+					// we take the variable found in whatever scope
+					stack.push(rt.getVar(token));
+				}
 			} else {
-				// its variable that has not been definied yet.
-				ExpressionVar newvar = new ExpressionVar();
-				rt.setVariable(token, newvar);					
-				stack.add(newvar);
+				// its variable cannot be found in any scope yet.
+				if(scopeToken == 2){
+					// the ? forces to create new variable inside the local scope
+					ExpressionVar newvar = new ExpressionVar();
+					rt.setVariable(token, newvar);					
+					stack.add(newvar);
+				} else {
+					throw new ExpressionException("Variable '" + token + "' not declared | " +"{"+expression+"}" + infoString);
+				}
 			}
 		}
 		return stack.pop().setExpression("{"+expression+"}" + infoString);
 	}
 
-	private int getDomainAssignmentPrefix(String var){
-		if(var.startsWith("??") || var.startsWith("!!")){
+	private int hasScopePrefix(String var){
+		if(var.startsWith("!")){
+			return 1;
+		} else if (var.startsWith("?")){
 			return 2;
 		}
-		else if(var.startsWith("?") || var.startsWith("!")){
-			return 1;
-		}
-		else return 0;
+		return 0;
 	}
 
 	/**
@@ -767,12 +782,12 @@ public class Expression {
 				pos++;
 				// recursive call
 				token.append(next(rt));
-			} else if (Character.isLetter(ch) || (ch == '_')  || (ch == '$') || (ch == '?')) {
+			} else if (Character.isLetter(ch) || (ch == '_')  || (ch == '$') || (ch == '?') || (ch == '!')) {
 				// --> it is a variable or a function
 				int currentPos = pos;
-				while ((Character.isLetter(ch) || Character.isDigit(ch) || (ch == '_') || (ch == '?') || (ch == '.') || (ch == '$'))
+				while ((Character.isLetter(ch) || Character.isDigit(ch) || (ch == '_') || (ch == '?') || (ch == '!') || (ch == '.') || (ch == '$'))
 						&& (pos < input.length())) {
-					if(ch == '?' && (pos - currentPos) > 1){
+					if((ch == '?' || ch == '!') && (pos - currentPos) > 1){
 						throw new ExpressionException(createError("Invalid Use of domain-assignment. Only '?' or '??' are permitted at the beginnig of the variable", (pos - token.length() + 1)));
 					}
 					token.append(input.charAt(pos++));

@@ -59,15 +59,26 @@ public class CmndWhile extends Cmnd {
 			if(getAttributeValue(ATTR_START) != null){
 				startCondition = new Expression(getAttributeValue(ATTR_START), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(prt);
 			}
+		} catch (ExpressionException e) {
+			throw new ScriptMsgException("Command <while>: Attribute <start>: " + e.getMessage());
+		}
+		
+		try {
 			ifCondition = new Expression(getAttributeValue(ATTR_REPEAT), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(prt);
+		} catch (ExpressionException e) {
+			throw new ScriptMsgException("Command <while>: Attribute <repeat>: " + e.getMessage());
+		}
+		
+		try {
 			if(getAttributeValue(ATTR_STEP) != null){
 				stepCondition = new Expression(getAttributeValue(ATTR_STEP), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(prt);
 			}
-			if(getAttributeValue(ATTR_NAME) != null){
-				name = getAttributeValue(ATTR_NAME);
-			}
 		} catch (ExpressionException e) {
-			throw new ScriptMsgException("Command <while>: Attribute Expression: " + e.getMessage());
+			throw new ScriptMsgException("Command <while>: Attribute <step>: " + e.getMessage());
+		}
+		
+		if(getAttributeValue(ATTR_NAME) != null){
+			name = getAttributeValue(ATTR_NAME);
 		}
 
 		if(debugMode)

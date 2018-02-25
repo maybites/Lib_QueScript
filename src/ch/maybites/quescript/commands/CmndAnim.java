@@ -119,7 +119,7 @@ public class CmndAnim extends Cmnd {
 		for(Cmnd child: this.getChildren()){
 			if(child.isCmndName(CmndTrack.NODE_NAME)){
 				CmndTrack flt = (CmndTrack)child;
-				prt.setVariable(name+"."+flt.trackName, flt.getValueObject(), prt.getDomainLevels() - 2);
+				prt.setVariable(name+"."+flt.trackName, flt.getValueObject(), prt.getScopeLevels() - 2);
 				prt.setVariable(flt.trackName, flt.getValueObject());
 				valueInterolators.add(flt);
 				if(relKeyTiming != null)

@@ -36,13 +36,19 @@ import java.util.Locale;
 import java.util.Map;
 
 import ch.maybites.quescript.expression.Expression.ExpressionException;
+import ch.maybites.tools.Debugger;
 
 public class RunTimeEnvironment {
 	/**
 	 * Super Storage for all Variables. The individual variables are stored inside 
 	 * HashMaps, their position inside this storage indicates their domain.
 	 */
-	private ArrayList<Map<String, ExpressionVar>> varStore;
+	private ArrayList<Map<String, ExpressionVar>> allVarScopes;
+	
+	/**
+	 * local variable scope
+	 */
+	private HashMap<String, ExpressionVar> localVarScope;
 	
 	/**
 	 * All defined operators with name and implementation.
@@ -63,18 +69,20 @@ public class RunTimeEnvironment {
 		operators = rt.operators;
 		functions = rt.functions;
 		staticVars = rt.staticVars;
-		varStore = new ArrayList<Map<String, ExpressionVar>>();
-		for(Map<String, ExpressionVar> m: rt.varStore)
-			varStore.add(m);
-		varStore.add(new HashMap<String, ExpressionVar>());		
+		allVarScopes = new ArrayList<Map<String, ExpressionVar>>();
+		for(Map<String, ExpressionVar> m: rt.allVarScopes)
+			allVarScopes.add(m);
+		localVarScope = new HashMap<String, ExpressionVar>();
+		allVarScopes.add(localVarScope);		
 	}
 
 	public RunTimeEnvironment() {
-		varStore = new ArrayList<Map<String, ExpressionVar>>();
+		allVarScopes = new ArrayList<Map<String, ExpressionVar>>();
 		operators = new HashMap<String, Operator>();
 		functions = new HashMap<String, Function>();
 		staticVars = new HashMap<String, ExpressionVar>();
-		varStore.add(new HashMap<String, ExpressionVar>());
+		localVarScope = new HashMap<String, ExpressionVar>();
+		allVarScopes.add(localVarScope);
 		
 		addOperator(new Operator("+", 20, true) {
 			@Override
@@ -418,70 +426,8 @@ public class RunTimeEnvironment {
 	/**
 	 * Clears all gobal variables all variables in the highest domain
 	 */
-	public void clearGlobalVariables() {
-		varStore.get(0).clear();
-	}
-
-	/**
-	 * Sets a global variable value. if no variable of this name has been set inside the top
-	 * domain, it will create one, no matter if another variable of the same name exists in a
-	 * lower domain
-	 * 
-	 * @param variable
-	 *            The variable name.
-	 * @param value
-	 *            The variable value.
-	 * @return reference to the public variable
-	 */
-	public ExpressionVar setGlobalVariable(String variable, ExpressionVar value) {
-		if(varStore.get(0).containsKey(variable)){
-			return varStore.get(0).get(variable).set(value);
-		} else {
-			varStore.get(0).put(variable, value.setUsedAsVariable());
-			return value;
-		}
-	}
-
-	/**
-	 * Sets a global variable value. if no variable of this name has been set inside the top
-	 * domain, it will create one, no matter if another variable of the same name exists in a
-	 * lower domain
-	 * 
-	 * @param variable
-	 *            The variable name.
-	 * @param value
-	 *            The variable value.
-	 * @return reference to the public variable
-	 */
-	public ExpressionVar setGlobalVariable(String variable, double value) {
-		if(varStore.get(0).containsKey(variable)){
-			return varStore.get(0).get(variable).setValue(value);
-		} else {
-			ExpressionVar v =  new ExpressionVar(value).setUsedAsVariable();
-			varStore.get(0).put(variable, v);
-			return v;
-		}
-	}
-
-	/**
-	 * Sets a global variable value. if no variable of this name has been set inside the top
-	 * domain, it will create one, no matter if another variable of the same name exists in a
-	 * lower domain
-	 * 
-	 * @param variable
-	 *            The variable name.
-	 * @param value
-	 *            The variable value.
-	 * @return reference to the public variable
-	 */
-	public ExpressionVar setGlobalVariable(String variable, String value) {
-		if(varStore.get(0).containsKey(variable)){
-			return varStore.get(0).get(variable).setValue(value);
-		} else {
-			ExpressionVar v =  new ExpressionVar(value).setUsedAsVariable();
-			varStore.get(0).put(variable, v);
-			return v;
-		}
+	public void clearVariables() {
+		allVarScopes.get(0).clear();
 	}
 
 	/**
@@ -499,7 +445,7 @@ public class RunTimeEnvironment {
 		if(v != null){
 			return v.set(value);
 		} else {
-			varStore.get(varStore.size() - 1).put(variable, value.setUsedAsVariable());
+			localVarScope.put(variable, value.setUsedAsVariable());
 			return value;
 		}
 	}
@@ -512,21 +458,38 @@ public class RunTimeEnvironment {
 	 *            The variable name.
 	 * @param value
 	 *            The variable value.
-	 * @param domain
-	 * 				0 = lowest, 1 = second lowest, etc
+	 * @param scopeID
+	 * 				0 = highes, 1 = second highes, etc
 	 * @return reference to the protected variable, null if the domain is incorrect
 	 */
-	public ExpressionVar setVariable(String variable, ExpressionVar value, int domain) {
-		if(domain < varStore.size()){
+	public ExpressionVar setVariable(String variable, ExpressionVar value, int scopeID) {
+		if(scopeID < allVarScopes.size()){
 			ExpressionVar v = getVar(variable);
 			if(v != null){
 				return v.set(value);
 			} else {
-				varStore.get(varStore.size() - 1 - domain).put(variable, value.setUsedAsVariable());
+				allVarScopes.get(allVarScopes.size() - 1 - scopeID).put(variable, value.setUsedAsVariable());
 				return value;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Sets this variable inside the local scopem no matter if there are other variables of the 
+	 * same name in higher scopes.
+	 * @param variable
+	 * @param value
+	 * @return
+	 */
+	public ExpressionVar setLocalVariable(String variable, ExpressionVar value) {
+		ExpressionVar v = localVarScope.get(variable);
+		if(v != null){
+			return v.set(value);
+		} else {
+			localVarScope.put(variable, value.setUsedAsVariable());
+			return value;
+		}
 	}
 
 	/**
@@ -545,7 +508,7 @@ public class RunTimeEnvironment {
 			return v.setValue(value);
 		} else {
 			v = new ExpressionVar(value).setUsedAsVariable();
-			varStore.get(varStore.size() - 1).put(variable, v);
+			localVarScope.put(variable, v);
 			return v;
 		}
 	}
@@ -566,21 +529,21 @@ public class RunTimeEnvironment {
 			return v.setValue(value);
 		} else {
 			v = new ExpressionVar(value).setUsedAsVariable();
-			varStore.get(varStore.size() - 1).put(variable, v);
+			localVarScope.put(variable, v);
 			return v;
 		}
 	}
 	
 	/**
-	 * Returns the specified variable
+	 * Returns the specified variable, looks first at the local scope and keeps on moving upwards.
 	 * @param variable
 	 * @return null if none of this name exists.
 	 */
 	public ExpressionVar getVar(String variable){
-		for(Map<String, ExpressionVar> m: varStore){
-			for(String var: m.keySet()){
-				if(var.equals(variable))
-					return m.get(var);
+		for(int i = allVarScopes.size() - 1; i >= 0; i--){
+			ExpressionVar v = allVarScopes.get(i).get(variable);
+			if(v != null){
+				return v;
 			}
 		}
 		return null;
@@ -592,43 +555,29 @@ public class RunTimeEnvironment {
 	 * @return true if one of with this name exists.
 	 */
 	public boolean containsVar(String variable){
-		for(Map<String, ExpressionVar> m: varStore){
-			for(String var: m.keySet()){
-				if(var.equals(variable))
-					return true;
+		for(Map<String, ExpressionVar> m: allVarScopes){
+			if(m.containsKey(variable)){
+				return true;
 			}
 		}
 		return false;
 	}
 
 	/**
-	 * looks if the specified variable exists inside the global domain (the highest level)
-	 * @param variable
+	 * Tells how many scope levels exist iniside this rt
 	 * @return
 	 */
-	public boolean containsGlobalVar(String variable){
-		for(String var: varStore.get(0).keySet()){
-			if(var.equals(variable))
-				return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Tells how many domain levels exist iniside this rt
-	 * @return
-	 */
-	public int getDomainLevels(){
-		return varStore.size();
+	public int getScopeLevels(){
+		return allVarScopes.size();
 	}
 	
 	/**
-	 * Returns the specified domain level
-	 * @param level
+	 * Returns the specified scope level
+	 * @param level - the top level is 0, the lowest level is getScopeLevels() - 1
 	 * @return
 	 */
-	public Map<String, ExpressionVar> getDomain(int level){
-		return varStore.get(level);
+	public Map<String, ExpressionVar> getScope(int level){
+		return allVarScopes.get(level);
 	}
 
 	/**
