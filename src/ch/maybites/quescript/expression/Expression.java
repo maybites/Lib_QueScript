@@ -635,9 +635,10 @@ public class Expression {
 		int scopeToken = 0;
 				
 		for (String token : rpn) {
+			// the scope token are the two semicolon in front of the variable
 			scopeToken = hasScopePrefix(token);
 			if(scopeToken > 0){
-				token = token.substring(1);
+				token = token.substring(scopeToken);
 			}
 			if (rt.operators.containsKey(token)) {
 				ArrayList<ExpressionVar> p = new ArrayList<ExpressionVar>();
@@ -679,8 +680,8 @@ public class Expression {
 			} else if (rt.staticVars.containsKey(token)) {
 				stack.push(rt.staticVars.get(token));
 			} else if (rt.containsVar(token)) {
-				if(scopeToken == 1){
-					// the ! forces to create / overwrite a variable in local scope, no
+				if(scopeToken == 2){
+					// the :: forces to create / overwrite a variable in local scope, no
 					// matter if there is a variable in a higher scope
 					ExpressionVar newvar = new ExpressionVar();
 					rt.setLocalVariable(token, newvar);					
@@ -693,7 +694,7 @@ public class Expression {
 				// its variable cannot be found in any scope yet.
 				// if a scope token is set, we create one
 				if(scopeToken > 0){
-					// the ? forces to create new variable inside the local scope
+					// the : or the :: forces to create new variable inside the local scope
 					ExpressionVar newvar = new ExpressionVar();
 					rt.setLocalVariable(token, newvar);					
 					stack.add(newvar);
@@ -706,10 +707,10 @@ public class Expression {
 	}
 
 	private int hasScopePrefix(String var){
-		if(var.startsWith("!")){
-			return 1;
-		} else if (var.startsWith("?")){
+		if(var.startsWith("::")){
 			return 2;
+		} else if (var.startsWith(":")){
+			return 1;
 		}
 		return 0;
 	}
@@ -827,13 +828,13 @@ public class Expression {
 				pos++;
 				// recursive call
 				token.append(next(rt));
-			} else if (Character.isLetter(ch) || (ch == '_')  || (ch == '$') || (ch == '?') || (ch == '!')) {
+			} else if (Character.isLetter(ch) || (ch == '_')  || (ch == '$') || (ch == ':')) {
 				// --> it is a variable or a function
 				int currentPos = pos;
-				while ((Character.isLetter(ch) || Character.isDigit(ch) || (ch == '_') || (ch == '?') || (ch == '!') || (ch == '.') || (ch == '$'))
+				while ((Character.isLetter(ch) || Character.isDigit(ch) || (ch == '_') || (ch == ':') || (ch == '.') || (ch == '$'))
 						&& (pos < input.length())) {
-					if((ch == '?' || ch == '!') && (pos - currentPos) > 1){
-						throw new ExpressionException(createError("Invalid Use of domain-assignment. Only '?' or '??' are permitted at the beginnig of the variable", (pos - token.length() + 1)));
+					if((ch == ':') && (pos - currentPos) > 1){
+						throw new ExpressionException(createError("Invalid use of scope-assignment. Only ':' or '::' are permitted at the beginnig of the variable", (pos - token.length() + 1)));
 					}
 					token.append(input.charAt(pos++));
 					ch = pos == input.length() ? 0 : input.charAt(pos);

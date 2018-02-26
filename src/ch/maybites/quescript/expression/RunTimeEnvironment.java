@@ -233,7 +233,10 @@ public class RunTimeEnvironment {
 						//                                   .getParam(arrayIndex)  // gets us the individual entry
 						//
 						return parameters.get(0).getParam(0).getParam(arrayIndex).set(parameters.get(1));
-					} 
+					} else if(parameters.get(1).isArray){
+						// if we want to assign an array to a variable inside an expr node:
+						return parameters.get(0).copyFrom(parameters.get(1));
+					}
 					return parameters.get(0).set(parameters.get(1));
 				}	
 				throw new ExpressionException("= can only assign to a variable");
@@ -261,6 +264,15 @@ public class RunTimeEnvironment {
 			}
 		});
 
+		addFunction(new Function("SIZE", 1) {
+			@Override
+			public ExpressionVar eval(List<ExpressionVar> parameters) {
+				if(parameters.get(0).isArray){
+					return new ExpressionVar(parameters.get(0).getParamSize());
+				}
+				return ExpressionVar.ZERO;
+			}
+		});
 		addFunction(new Function("NOT", 1) {
 			@Override
 			public ExpressionVar eval(List<ExpressionVar> parameters) {

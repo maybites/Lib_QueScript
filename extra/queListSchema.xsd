@@ -41,6 +41,13 @@
         </xs:restriction>
     </xs:simpleType>
 </xs:attribute>
+<xs:attribute name="scope"> 
+    <xs:simpleType>
+        <xs:restriction base="xs:string">
+           	<xs:pattern value="script|que|local"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:attribute>
 
 <xs:attribute name="fadeto" type="xs:string"/> 
 <xs:attribute name="duration" type="xs:string"/> 
@@ -61,7 +68,6 @@
 <xs:attribute name="repeat" type="xs:string"/> 
 <xs:attribute name="start" type="xs:string"/> 
 <xs:attribute name="step" type="xs:string"/> 
-<xs:attribute name="vardomain" type="xs:string"/> 
 <xs:attribute name="sendto" type="xs:string" default="default"/> 
 
 <xs:element name="send" type="xs:string"/>
