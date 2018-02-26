@@ -58,7 +58,7 @@ public class RunTimeEnvironment {
 	/**
 	 * All defined functions with name and implementation.
 	 */
-	protected Map<String, Function> functions;
+	public Map<String, Function> functions;
 
 	/**
 	 * All defined variables with name and value.
@@ -120,6 +120,27 @@ public class RunTimeEnvironment {
 				return new ExpressionVar(Math.pow(parameters.get(0).getNumberValue(), parameters.get(1).getNumberValue()));
 			}
 		});
+		
+		addOperator(new Operator("[]", 50, false) {
+			@Override
+			public ExpressionVar eval(List<ExpressionVar> parameters) throws ExpressionException {
+				ExpressionVar array = parameters.get(0);
+				ExpressionVar indice = parameters.get(1);
+				if(array.isArray){
+					if(indice.isNumber){
+						int index = (int)indice.getNumberValue();
+						if(index < array.getParamSize()){
+							array.arrayIndex = index;
+							return array.getParam(index);
+						} 					
+						throw new ExpressionException("Array index out of bounds exception: " + index + " " + array.getParamSize());	
+					} 
+					throw new ExpressionException("Array index invalid number: " + parameters.get(1).getStringValue());
+				}
+				throw new ExpressionException("Invalid operation: " + parameters.get(0).getStringValue() + " is not an array.");
+			}
+		});
+
 		addOperator(new Operator("&&", 4, false) {
 			@Override
 			public ExpressionVar eval(List<ExpressionVar> parameters) {
@@ -199,8 +220,22 @@ public class RunTimeEnvironment {
 			@Override
 			public ExpressionVar eval(List<ExpressionVar> parameters) throws ExpressionException{
 				if(parameters.size() == 2 && parameters.get(0).isUsedAsVariable){
+					if(parameters.get(0).isArray){
+						// assigned = assignee
+						// we need to evaluate the array to assigned again, incase the same array
+						// is also part of the evaluation tree inside the assignee
+						parameters.get(0).eval();
+						// this will set the the arrayIndex correctly.
+						int arrayIndex = parameters.get(0).getParam(0).arrayIndex;
+						// if it is an array we dive into the parameter:
+						// 		parameters.get(0) 							        // gets us the assigned var
+						//						 .getParam(0) 				        // gets us the array var
+						//                                   .getParam(arrayIndex)  // gets us the individual entry
+						//
+						return parameters.get(0).getParam(0).getParam(arrayIndex).set(parameters.get(1));
+					} 
 					return parameters.get(0).set(parameters.get(1));
-				}
+				}	
 				throw new ExpressionException("= can only assign to a variable");
 			}
 		});
@@ -218,6 +253,7 @@ public class RunTimeEnvironment {
 				return parameters.get(0).compareTo(parameters.get(1)) != 0 ? ExpressionVar.ONE : ExpressionVar.ZERO;
 			}
 		});
+		
 		addOperator(new Operator("<>", 7, false) {
 			@Override
 			public ExpressionVar eval(List<ExpressionVar> parameters) throws ExpressionException {
@@ -310,6 +346,15 @@ public class RunTimeEnvironment {
 			@Override
 			public ExpressionVar eval(List<ExpressionVar> parameters) {
 				return new ExpressionVar(Math.toDegrees(parameters.get(0).getNumberValue()));
+			}
+		});
+		addFunction(new Function("ARRAY", -1) {
+			@Override
+			public ExpressionVar eval(List<ExpressionVar> parameters) throws ExpressionException {
+				if (parameters.size() == 0) {
+					throw new ExpressionException("ARRAY requires at least one parameter");
+				}
+				return new ExpressionVar(new ArrayList<ExpressionVar>(parameters));
 			}
 		});
 		addFunction(new Function("MAX", -1) {
@@ -476,16 +521,21 @@ public class RunTimeEnvironment {
 	}
 
 	/**
-	 * Sets this variable inside the local scopem no matter if there are other variables of the 
-	 * same name in higher scopes.
-	 * @param variable
-	 * @param value
-	 * @return
+	 * Sets this variable inside the local scope no matter if there are other variables of the 
+	 * same name in higher scopes. If there is already a variable, it will inject the content of the
+	 * value into its Expression
+	 * @param variable String identifier
+	 * @param value ExpressionVar object
+	 * @return the reference object of this variable
 	 */
 	public ExpressionVar setLocalVariable(String variable, ExpressionVar value) {
 		ExpressionVar v = localVarScope.get(variable);
 		if(v != null){
-			return v.set(value);
+			if(value.isArray){
+				return v.copyFrom(value);
+			} else {
+				return v.set(value);
+			}
 		} else {
 			localVarScope.put(variable, value.setUsedAsVariable());
 			return value;
@@ -542,6 +592,21 @@ public class RunTimeEnvironment {
 	public ExpressionVar getVar(String variable){
 		for(int i = allVarScopes.size() - 1; i >= 0; i--){
 			ExpressionVar v = allVarScopes.get(i).get(variable);
+			if(v != null){
+				return v;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the specified variable, looks only at the local scope.
+	 * @param variable
+	 * @return null if none of this name exists.
+	 */
+	public ExpressionVar getLocalVar(String variable){
+		for(int i = localVarScope.size() - 1; i >= 0; i--){
+			ExpressionVar v = localVarScope.get(variable);
 			if(v != null){
 				return v;
 			}

@@ -43,10 +43,13 @@ public class ExpressionVar {
 	private double dValue;
 	private String sValue;
 	
+	protected int arrayIndex = 0;
+	
 	private Operation operation; 
 	private ArrayList<ExpressionVar> params;
 	
 	public boolean isNumber = false;
+	public boolean isArray = false;
 	
 	// stores the expression if this instance is the result of an Expression.parse(rt)
 	private String expr = null;
@@ -85,16 +88,81 @@ public class ExpressionVar {
 	 */
 	protected ExpressionVar(Operation op, ArrayList<ExpressionVar> p){
 		operation = op;
+		if(op.oper.equals("ARRAY") || op.oper.equals("[]")){
+			isArray = true;
+			if(op.oper.equals("[]")){
+				isUsedAsVariable = true;
+			}
+		}
 		params = p;
 		this.dValue = 0;
 		isNumber = true;
 	}
 	
 	/**
+	 * Creates an ExpressionVar Array with an Evaluation Tree 
+	 * @param varValue
+	 */
+	protected ExpressionVar(ArrayList<ExpressionVar> p){
+		operation = null;
+		params = p;
+		dValue = 0;
+		isNumber = true;
+		isArray = true;
+		isUsedAsVariable = true;
+		if(p.size() > 0){
+			set(p.get(0));
+		}
+	}
+
+
+	/**
+	 * copies the content of the passed ExpressionVar into this ExpressionVar 
+	 * @param expr
+	 * @returns this instance
+	 */
+	public ExpressionVar copyFrom(ExpressionVar expr){
+		this.arrayIndex = expr.arrayIndex;
+		this.dValue = expr.dValue;
+		this.expr = expr.expr;
+		this.isArray = expr.isArray;
+		this.isNumber = expr.isNumber;
+		this.isUsedAsVariable = expr.isUsedAsVariable;
+		this.operation = expr.operation;
+		this.params = expr.params;
+		this.sValue = expr.sValue;
+		return this;
+	}
+
+	/**
+	 * get the number of parameters inside this ExpressionVar
+	 * @return the number of parameters
+	 */
+	protected int getParamSize(){
+		if(params != null){
+			return params.size();
+		}
+		return 0;
+	}
+	
+	
+	/**
+	 * get the ExpressionVar at the parameter index
+	 * @param index
+	 * @return null if no parameter is set
+	 */
+	protected ExpressionVar getParam(int index){
+		if(params != null && params.size() > index){
+			return params.get(index);
+		}
+		return null;
+	}
+	
+	/**
 	 * Used by RunTimeEnvironment to tell if this instance is a variable
 	 * @return
 	 */
-	protected ExpressionVar setUsedAsVariable(){
+	public ExpressionVar setUsedAsVariable(){
 		isUsedAsVariable = true;
 		return this;
 	}

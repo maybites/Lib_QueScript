@@ -74,6 +74,9 @@ public class CmndQue extends Cmnd{
 			executionShuttle.stop();
 			bang(executionShuttle);
 		}
+		
+		//first we want 
+		
 		// and now it can be restarted
 		executionShuttle.execute();
 //		Debugger.verbose("Script-Command Que", "...executed: " + this.queName);	
@@ -192,6 +195,9 @@ public class CmndQue extends Cmnd{
 		return lastChild.lineNumber - lineNumber;
 	}
 
+	/**
+	 * sends the bang message through the tree
+	 */
 	public void bang(CMsgShuttle _msg) {
 		for(Cmnd child: super.getChildren()){
 			child.bang(_msg);

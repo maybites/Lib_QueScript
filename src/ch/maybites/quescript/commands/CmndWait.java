@@ -81,6 +81,9 @@ public class CmndWait extends Cmnd {
 					myTime = getAttributeTime(getAttributeValue(ATTR_TIMER), " at line(" + lineNumber + ")",rt);
 				} else if(smode.equals(ATTR_COMPLEX)){
 					mode = MODE_COMPLEX;
+					for(Cmnd child: this.getChildren()){
+						child.setup(rt);
+					}
 				} else if(smode.equals(ATTR_TRIGGER)){
 					mode = MODE_TRIGGER;
 				} else if(smode.equals(ATTR_RAMP)){

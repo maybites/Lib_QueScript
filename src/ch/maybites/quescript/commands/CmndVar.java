@@ -1,5 +1,7 @@
 package ch.maybites.quescript.commands;
 
+import java.util.Locale;
+
 import org.w3c.dom.Node;
 
 import ch.maybites.quescript.expression.Expression;
@@ -15,6 +17,7 @@ public class CmndVar extends Cmnd {
 
 	private static String ATTR_NAME = "name";
 
+	ExpressionVar myExpression;
 	ExpressionVar varValue;
 	String name;
 	
@@ -36,16 +39,32 @@ public class CmndVar extends Cmnd {
 		prt = rt;
 		if(super.content != null){
 			try {
-				varValue = new Expression(super.content, "{", "}").setInfo(" at line(" + lineNumber + ")").parse(rt);
+				myExpression = new Expression(super.content, "{", "}").setInfo(" at line(" + lineNumber + ")").parse(rt);
 			} catch (ExpressionException e) {
 				throw new ScriptMsgException("QueScript - Command <var>: Value Expression: " + e.getMessage());
 			}
 			
 			name = getAttributeValue(ATTR_NAME);
-
-			// if no global variable of this name exists, create one with value NULL
+			
+			if(prt.functions.containsKey(name.toUpperCase(Locale.ROOT))){
+				throw new ScriptMsgException("QueScript - Command <var>: Attribute name: Variable name invalid: It matches a function: " + name + "() at line(" + lineNumber + ")");
+			}
+			
+			// if no local variable of this name exists, create one with value NULL
 			try {
-				prt.setVariable(name, varValue.eval());
+				myExpression.eval();
+				varValue = new ExpressionVar();
+				if(myExpression.isArray){
+					varValue.copyFrom(myExpression);
+				} else {
+					varValue.set(myExpression);
+				}
+				varValue.setUsedAsVariable();
+				// we create two different expressionVars because we dont want to 
+				//   have the original expression altered by any other process.
+				//     the varValue variable is passed on to other expressions, might be part of them and
+				//     altered by them, so we can't afford to break these references. 
+				prt.setLocalVariable(name, varValue);
 			} catch (ExpressionException e) {
 				Debugger.error("QueScript que("+parentNode.getQueName()+") - Command <var>: Value Expression", e.getMessage());
 			}
@@ -58,9 +77,21 @@ public class CmndVar extends Cmnd {
 		}
 	}
 
-	public void bang(CMsgShuttle _msg) {;}
+	public void bang(CMsgShuttle _msg) {
+		if(!_msg.isWaitLocked()){
+			lockLessBang(_msg);
+		}
+	}
 	
-	public void lockLessBang(CMsgShuttle _msg){;}
+	public void lockLessBang(CMsgShuttle _msg){
+		try {
+			// we already know that this variable must exist, since it was created on load-time
+			// so we can simply pass on the evaluation of the initial expression
+			prt.setLocalVariable(name, myExpression.eval());
+		} catch (ExpressionException e) {
+			Debugger.error("QueScript que("+parentNode.getQueName()+") - Command <var>: Value Expression", e.getMessage());
+		}
+	}
 
 	public void resume(long _timePassed) {;}
 

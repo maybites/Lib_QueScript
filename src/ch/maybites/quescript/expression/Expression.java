@@ -492,8 +492,31 @@ public class Expression {
 								Locale.ROOT))) {
 					outputQueue.add(stack.pop());
 				}
+			} else if ("[".equals(token)) {
+				if (previousToken != null) {
+					if (isNumber(previousToken)) {
+						throw new ExpressionException(createError("Array perenthesis [ is missing variable name", tokenizer.getPos()));
+					}
+					// if the [ is preceded by a valid variable, then it
+					// denotes the start of an operator list
+					if (!rt.containsVar(previousToken)) {
+						throw new ExpressionException(createError("Array perenthesis [ is missing variable name", tokenizer.getPos()));						
+					}
+				}
+				stack.push(token);
+			} else if ("]".equals(token)) {
+				while (!stack.isEmpty() && !"[".equals(stack.peek())) {
+					outputQueue.add(stack.pop());
+				}
+				if (stack.isEmpty()) {
+					throw new ExpressionException(createError("Mismatched parentheses - missing opening '['", tokenizer.getPos()));
+				}
+				stack.pop();
+				outputQueue.add("[]");
+				// the array parantheses are turned into an operand 
+				// with the variable and the index as parameter
 			} else if (token.startsWith("'") && token.endsWith("'")) {
-				if (previousToken != null && !previousToken.equals("(")) {
+				if (previousToken != null && !previousToken.equals("(") && !previousToken.equals(",")) {
 					if (!rt.operators.containsKey(previousToken)) {
 						throw new ExpressionException(createError("Missing operator", tokenizer.getPos() - token.length()));
 					}
@@ -511,6 +534,10 @@ public class Expression {
 			if ("(".equals(element) || ")".equals(element)) {
 				throw new ExpressionException(
 						"Mismatched parentheses - missing closing ) \n" + "{"+expression+"}" + infoString);
+			}
+			if ("[".equals(element) || "]".equals(element)) {
+				throw new ExpressionException(
+						"Mismatched parentheses - missing closing ] \n" + "{"+expression+"}" + infoString);
 			}
 			if ("'".equals(element)) {
 				throw new ExpressionException(
@@ -545,6 +572,16 @@ public class Expression {
 		Stack<Integer> params = new Stack<Integer>();
 		for (String token : rpn) {
 			if ("(".equals(token)) {
+				// is this a nested function call?
+				if (!params.isEmpty()) {
+					// increment the current function's param count
+					// (the return of the nested function call
+					// will be a parameter for the current function)
+					params.set(params.size() - 1, params.peek() + 1);
+				}
+				// start a new parameter count
+				params.push(0);
+			} else if ("[".equals(token)) {
 				// is this a nested function call?
 				if (!params.isEmpty()) {
 					// increment the current function's param count
@@ -610,21 +647,27 @@ public class Expression {
 				p.add(v1);
 				stack.push(new ExpressionVar(rt.operators.get(token), p));
 			} else if (rt.functions.containsKey(token.toUpperCase(Locale.ROOT))) {
-				Function f = rt.functions.get(token.toUpperCase(Locale.ROOT));
-				ArrayList<ExpressionVar> p = new ArrayList<ExpressionVar>(
-						!f.numParamsVaries() ? f.getNumParams() : 0);
-				// pop parameters off the stack until we hit the start of 
-				// this function's parameter list
-				while (!stack.isEmpty() && stack.peek() != PARAMS_START) {
-					p.add(0, stack.pop());
+				if(scopeToken == 0){
+					Function f = rt.functions.get(token.toUpperCase(Locale.ROOT));
+					ArrayList<ExpressionVar> p = new ArrayList<ExpressionVar>(
+							!f.numParamsVaries() ? f.getNumParams() : 0);
+					// pop parameters off the stack until we hit the start of 
+					// this function's parameter list
+					while (!stack.isEmpty() && stack.peek() != PARAMS_START) {
+						p.add(0, stack.pop());
+					}
+					if (stack.peek() == PARAMS_START) {
+						stack.pop();
+					}
+					if (!f.numParamsVaries() && p.size() != f.getNumParams()) {
+						throw new ExpressionException("Function " + token + " expected " + f.getNumParams() + " parameters, got " + p.size() + " | " +"{"+expression+"}" + infoString);
+					}
+					stack.push(new ExpressionVar(f, p));
+				} else {
+					// if the token has a scopeToken in front, it is meant to be a variable, but
+					// it matches a function and that is not allowed.
+					throw new ExpressionException("Variable name invalid: Matches a function: " + token + "() | {"+expression+"}" + infoString);
 				}
-				if (stack.peek() == PARAMS_START) {
-					stack.pop();
-				}
-				if (!f.numParamsVaries() && p.size() != f.getNumParams()) {
-					throw new ExpressionException("Function " + token + " expected " + f.getNumParams() + " parameters, got " + p.size() + " | " +"{"+expression+"}" + infoString);
-				}
-				stack.push(new ExpressionVar(f, p));
 			} else if ("(".equals(token)) {
 				stack.push(PARAMS_START);
 			} else if (token.startsWith("'")) { 
@@ -648,10 +691,11 @@ public class Expression {
 				}
 			} else {
 				// its variable cannot be found in any scope yet.
-				if(scopeToken == 2){
+				// if a scope token is set, we create one
+				if(scopeToken > 0){
 					// the ? forces to create new variable inside the local scope
 					ExpressionVar newvar = new ExpressionVar();
-					rt.setVariable(token, newvar);					
+					rt.setLocalVariable(token, newvar);					
 					stack.add(newvar);
 				} else {
 					throw new ExpressionException("Variable '" + token + "' not declared | " +"{"+expression+"}" + infoString);
@@ -761,13 +805,14 @@ public class Expression {
 				ch = input.charAt(++pos);
 			}
 			if (Character.isDigit(ch)) {
-				while ((Character.isDigit(ch) || ch == decimalSeparator
-                                                || ch == 'e' || ch == 'E'
-                                                || (ch == minusSign && token.length() > 0 
-                                                    && ('e'==token.charAt(token.length()-1) || 'E'==token.charAt(token.length()-1)))
-                                                || (ch == '+' && token.length() > 0 
-                                                    && ('e'==token.charAt(token.length()-1) || 'E'==token.charAt(token.length()-1)))
-                                                ) && (pos < input.length())) {
+				while ((Character.isDigit(ch) 
+						|| ch == decimalSeparator
+                        || ch == 'e' || ch == 'E'
+                        || (ch == minusSign && token.length() > 0 && ('e'==token.charAt(token.length()-1) 
+                        || 'E'==token.charAt(token.length()-1)))
+                        || (ch == '+' && token.length() > 0  && ('e'==token.charAt(token.length()-1) 
+                        || 'E'==token.charAt(token.length()-1)))) 
+						&& (pos < input.length())) {
 					// --> it is a number
 					token.append(input.charAt(pos++));
 					ch = pos == input.length() ? 0 : input.charAt(pos);
@@ -793,7 +838,7 @@ public class Expression {
 					token.append(input.charAt(pos++));
 					ch = pos == input.length() ? 0 : input.charAt(pos);
 				}
-			} else if (ch == '(' || ch == ')' || ch == ',') {
+			} else if (ch == '(' || ch == ')' || ch == ',' || ch == '[' || ch == ']') {
 				// it is a structural delimiter 
 				token.append(ch);
 				pos++;

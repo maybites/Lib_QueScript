@@ -71,11 +71,11 @@ public class QueMessageAtom extends QueMessageRAW{
 //			System.out.println(" evallist size = " + evalList.size() + " | messageList size = " + messageList.length);
 			for(Integer i: evalList.keySet()){
 //				System.out.println(" -> evallist int = " + i);
-				ev = evalList.get(i);
+				ev = evalList.get(i).eval();
 				if(ev.isNumber)
-					messageList[i] = Atom.newAtom(ev.eval().getNumberValue());
+					messageList[i] = Atom.newAtom(ev.getNumberValue());
 				else
-					messageList[i] = Atom.newAtom(ev.eval().getStringValue());
+					messageList[i] = Atom.newAtom(ev.getStringValue());
 			}
 		}
 		return this;

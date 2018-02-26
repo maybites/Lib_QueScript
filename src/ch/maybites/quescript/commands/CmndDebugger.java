@@ -14,8 +14,12 @@ import ch.maybites.tools.Debugger;
 public class CmndDebugger extends Cmnd {
 	protected static String NODE_NAME = "debugger";
 
-	private static String ATTR_SHOWVARDOMAIN = "vardomain";
+	private static String ATTR_SCOPE = "scope";
 	private static String ATTR_NAME = "name";
+
+	private static String ATTR_SCOPE_SCRIPT = "script";
+	private static String ATTR_SCOPE_QUE = "que";
+	private static String ATTR_SCOPE_LOCAL = "local";
 
 	RunTimeEnvironment prt;
 	
@@ -36,12 +40,18 @@ public class CmndDebugger extends Cmnd {
 	 */
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
 		prt = rt;
-
-		if(getAttributeValue(ATTR_SHOWVARDOMAIN) != null){
-			try{
-				showVarDomain = Integer.parseInt(getAttributeValue(ATTR_SHOWVARDOMAIN));
-			} catch (NumberFormatException e){
-				new ScriptMsgException("<que name=\""+parentNode.getQueName()+"\"> <debugger>: attribute '" + ATTR_SHOWVARDOMAIN + "' must be an integer, but instead it is " + getAttributeValue(ATTR_SHOWVARDOMAIN) + " at line(" + lineNumber +" )");
+		showVarDomain = 0;
+		
+		if(getAttributeValue(ATTR_SCOPE) != null){
+			String scope = getAttributeValue(ATTR_SCOPE);
+			if(scope.equals(ATTR_SCOPE_SCRIPT)){
+				showVarDomain = 0;
+			} else if(scope.equals(ATTR_SCOPE_QUE)){
+				showVarDomain = 1;
+			} else if(scope.equals(ATTR_SCOPE_LOCAL)){
+				showVarDomain = 10;
+			} else{
+				new ScriptMsgException("<que name=\""+parentNode.getQueName()+"\"> <debugger>: attribute '" + ATTR_SCOPE + "' must be either script|que|local, but is " + getAttributeValue(ATTR_SCOPE) + " at line(" + lineNumber +" )");
 			}
 		}
 		if(getAttributeValue(ATTR_NAME) != null){
@@ -72,24 +82,21 @@ public class CmndDebugger extends Cmnd {
 			ExpressionVar exVar;
 			Iterator<String> it;
 			getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("DEBUGGER " + name).done());
-			getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("------------------").done());
 				
 			int levels = prt.getScopeLevels();
-			int currnt;
-			for(int i = (levels - 1); i >= 0; i--){	
-				currnt = levels  - 1 - i;
-				if(showVarDomain >= currnt){
+			for(int i = 0; i < levels; i++){	
+				if(showVarDomain >= i){
 					HashMap<String, ExpressionVar> global = (HashMap<String, ExpressionVar>) prt.getScope(i);
-					getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("Variables inside Domain:").add(currnt).done());
+					getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("-------  ").add("Scope:").add(i).add("  -------").done());
 					it = global.keySet().iterator();
 					while(it.hasNext()){
 						var = it.next();
 						exVar = global.get(var);
 						getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add(var).add(" = ").add(exVar.getStringValue()).add(" (" + ((exVar.isNumber)?"float":"string") + ")").done());
 					}
-					getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("------------------").done());
 				}
 			}
+			getOutput().outputSendMsg(QueMsgFactory.getMsg("print").add("------------------").done());
 		}		
 	}
 
