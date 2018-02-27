@@ -56,7 +56,7 @@ public class CmndQue extends Cmnd{
 		if(debugMode)
 			Debugger.verbose("QueScript - NodeFactory", "... created Que:" + queName + " at " + lineNumber);	
 
-		prt.setVariable("$TIMER", 0);
+		prt.setLocalVariable("$TIMER", 0);
 		for(Cmnd child: this.getChildren()){
 			child.setup(prt);
 		}
@@ -180,6 +180,17 @@ public class CmndQue extends Cmnd{
 		for(Cmnd child: getChildren()){
 			child.clear();
 		}
+	}
+	
+	/**
+	 * creates a variable inside the que-scope
+	 * @param name
+	 * @param values
+	 */
+	protected void setQueVar(String name, ArrayList<ExpressionVar> values){
+		// we actually dont want quevar, because they set the <var>-defined variables,
+		// and they are reset to their initial expression every time the que restarts.
+		// this means, no variable ever set through this channel will be accessible
 	}
 
 	protected void setWait(int waitLineNumber, String waitLineMsg){

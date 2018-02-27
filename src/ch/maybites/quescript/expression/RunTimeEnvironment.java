@@ -264,7 +264,7 @@ public class RunTimeEnvironment {
 			}
 		});
 
-		addFunction(new Function("SIZE", 1) {
+		addFunction(new Function("LENGTH", 1) {
 			@Override
 			public ExpressionVar eval(List<ExpressionVar> parameters) {
 				if(parameters.get(0).isArray){
@@ -367,6 +367,34 @@ public class RunTimeEnvironment {
 					throw new ExpressionException("ARRAY requires at least one parameter");
 				}
 				return new ExpressionVar(new ArrayList<ExpressionVar>(parameters));
+			}
+		});
+		addFunction(new Function("CLONE", -1) {
+			@Override
+			public ExpressionVar eval(List<ExpressionVar> parameters) throws ExpressionException {
+				throw new ExpressionException("CLONE is not working yet..");
+				/*
+				if (parameters.size() == 0) {
+					throw new ExpressionException("ARRAY requires at least one parameter");
+				} else {
+					if(parameters.size() == 1){
+						if(parameters.get(0).isArray){
+							ArrayList<ExpressionVar> newArray = new ArrayList<ExpressionVar>();
+							ExpressionVar param;
+							for(int i = 0; i < parameters.get(0).getParamSize(); i++){
+								param = parameters.get(0).getParam(i).eval();
+								if(param.isNumber){
+									newArray.add(new ExpressionVar(param.getNumberValue()));
+								} else {
+									newArray.add(new ExpressionVar(param.getStringValue()));
+								}
+							}
+							return new ExpressionVar(new ArrayList<ExpressionVar>(newArray));
+						} 
+					}
+					return new ExpressionVar(new ArrayList<ExpressionVar>(parameters));
+				}
+				*/
 			}
 		});
 		addFunction(new Function("MAX", -1) {
@@ -489,7 +517,29 @@ public class RunTimeEnvironment {
 
 	/**
 	 * Sets a variable value. If the variable already exists, it uses the existing one, 
-	 * otherwise it will create a local one (the lowest domain)
+	 * otherwise it will create a new own on the specified domain
+	 * 
+	 * @param variable The variable name.
+	 * @param value The variable value.
+	 * @param scope the scope to write the variable to: 0 - local scope, 1 - next higher etc.
+	 * @return reference to the protected variable, null if the domain is incorrect
+	 */
+	public ExpressionVar setVariable(String variable, ExpressionVar value, int scope) {
+		if(scope < allVarScopes.size()){
+			ExpressionVar v = getVar(variable);
+			if(v != null){
+				return v.set(value);
+			} else {
+				allVarScopes.get(allVarScopes.size() - 1 - scope).put(variable, value.setUsedAsVariable());
+				return value;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Sets a variable value. If the variable already exists (no matter which scope), 
+	 * it uses the existing one, otherwise it will create one in the local domain
 	 * 
 	 * @param variable
 	 *            The variable name.
@@ -505,31 +555,6 @@ public class RunTimeEnvironment {
 			localVarScope.put(variable, value.setUsedAsVariable());
 			return value;
 		}
-	}
-
-	/**
-	 * Sets a variable value. If the variable already exists, it uses the existing one, 
-	 * otherwise it will create a new own on the specified domain
-	 * 
-	 * @param variable
-	 *            The variable name.
-	 * @param value
-	 *            The variable value.
-	 * @param scopeID
-	 * 				0 = highes, 1 = second highes, etc
-	 * @return reference to the protected variable, null if the domain is incorrect
-	 */
-	public ExpressionVar setVariable(String variable, ExpressionVar value, int scopeID) {
-		if(scopeID < allVarScopes.size()){
-			ExpressionVar v = getVar(variable);
-			if(v != null){
-				return v.set(value);
-			} else {
-				allVarScopes.get(allVarScopes.size() - 1 - scopeID).put(variable, value.setUsedAsVariable());
-				return value;
-			}
-		}
-		return null;
 	}
 
 	/**
@@ -555,8 +580,8 @@ public class RunTimeEnvironment {
 	}
 
 	/**
-	 * Sets a variable value. If the variable already exists, it uses the existing one, 
-	 * otherwise it will create a local one (the lowest domain)
+	 * Sets a variable value. If a local variable of the same name already exists, 
+	 * it uses the existing one, otherwise it will create a new one
 	 * 
 	 * @param variable
 	 *            The variable name.
@@ -564,8 +589,8 @@ public class RunTimeEnvironment {
 	 *            The variable value.
 	 * @return reference to the protected variable
 	 */
-	public ExpressionVar setVariable(String variable, double value) {
-		ExpressionVar v = getVar(variable);
+	public ExpressionVar setLocalVariable(String variable, double value) {
+		ExpressionVar v = localVarScope.get(variable);
 		if(v != null){
 			return v.setValue(value);
 		} else {
@@ -576,8 +601,8 @@ public class RunTimeEnvironment {
 	}
 
 	/**
-	 * Sets a variable value. If the variable already exists, it uses the existing one, 
-	 * otherwise it will create a local one (the lowest domain)
+	 * Sets a variable value. If a local variable of the same name already exists, 
+	 * it uses the existing one, otherwise it will create a new one
 	 * 
 	 * @param variable
 	 *            The variable name.
@@ -585,8 +610,8 @@ public class RunTimeEnvironment {
 	 *            The variable value.
 	 * @return reference to the protected variable
 	 */
-	public ExpressionVar setVariable(String variable, String value) {
-		ExpressionVar v = getVar(variable);
+	public ExpressionVar setLocalVariable(String variable, String value) {
+		ExpressionVar v = localVarScope.get(variable);
 		if(v != null){
 			return v.setValue(value);
 		} else {

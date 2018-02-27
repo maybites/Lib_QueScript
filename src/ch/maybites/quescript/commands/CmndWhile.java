@@ -14,14 +14,14 @@ import ch.maybites.tools.Debugger;
 public class CmndWhile extends Cmnd {
 	protected static String NODE_NAME = "while";
 		
-	private static String ATTR_REPEAT = "repeat";
-	private static String ATTR_START = "start";
-	private static String ATTR_STEP = "step";
+	private static String ATTR_CONDITION = "condition";
+	private static String ATTR_INIT = "init";
+	private static String ATTR_NEXT = "next";
 	private static String ATTR_NAME = "name";
 		
-	private ExpressionVar ifCondition = null;
-	private ExpressionVar startCondition = null;
-	private ExpressionVar stepCondition = null;
+	private ExpressionVar whileCondition = null;
+	private ExpressionVar initExpression = null;
+	private ExpressionVar nextExpression = null;
 	
 	private boolean running = false;
 	
@@ -56,25 +56,25 @@ public class CmndWhile extends Cmnd {
 		RunTimeEnvironment prt = new RunTimeEnvironment(rt);
 
 		try {
-			if(getAttributeValue(ATTR_START) != null){
-				startCondition = new Expression(getAttributeValue(ATTR_START), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(prt);
+			if(getAttributeValue(ATTR_INIT) != null){
+				initExpression = new Expression(getAttributeValue(ATTR_INIT), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(prt);
 			}
 		} catch (ExpressionException e) {
-			throw new ScriptMsgException("Command <while>: Attribute <start>: " + e.getMessage());
+			throw new ScriptMsgException("Command <while>: Attribute <init>: " + e.getMessage());
 		}
 		
 		try {
-			ifCondition = new Expression(getAttributeValue(ATTR_REPEAT), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(prt);
+			whileCondition = new Expression(getAttributeValue(ATTR_CONDITION), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(prt);
 		} catch (ExpressionException e) {
-			throw new ScriptMsgException("Command <while>: Attribute <repeat>: " + e.getMessage());
+			throw new ScriptMsgException("Command <while>: Attribute <condition>: " + e.getMessage());
 		}
 		
 		try {
-			if(getAttributeValue(ATTR_STEP) != null){
-				stepCondition = new Expression(getAttributeValue(ATTR_STEP), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(prt);
+			if(getAttributeValue(ATTR_NEXT) != null){
+				nextExpression = new Expression(getAttributeValue(ATTR_NEXT), "{", "}").setInfo(" at line(" + lineNumber + ")").parse(prt);
 			}
 		} catch (ExpressionException e) {
-			throw new ScriptMsgException("Command <while>: Attribute <step>: " + e.getMessage());
+			throw new ScriptMsgException("Command <while>: Attribute <next>: " + e.getMessage());
 		}
 		
 		if(getAttributeValue(ATTR_NAME) != null){
@@ -82,7 +82,7 @@ public class CmndWhile extends Cmnd {
 		}
 
 		if(debugMode)
-			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created while Cmnd: " + getAttributeValue(ATTR_REPEAT));
+			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created while Cmnd: " + getAttributeValue(ATTR_CONDITION));
 
 		// Make sure the que- and local- variables are created before the children are parsed
 		for(Cmnd child: this.getChildren()){
@@ -104,18 +104,18 @@ public class CmndWhile extends Cmnd {
 			running = false;
 		if(!_msg.isWaitLocked() || running){
 			try {
-				if(!running && startCondition != null){
+				if(!running && initExpression != null){
 					// the <while> loop starts here. should be only called once
-					startCondition.eval();
+					initExpression.eval();
 				}
-				if(ifCondition.eval().getNumberValue() >= 1){
+				if(whileCondition.eval().getNumberValue() >= 1){
 					for(Cmnd child : getChildren()){
 						child.lockLessBang(_msg);
 					}
 					// if there is a step expression, 
 					// it will be executed after all the <while> children
-					if(stepCondition != null)
-						stepCondition.eval();
+					if(nextExpression != null)
+						nextExpression.eval();
 					running = true;
 				} else {
 					running = false;

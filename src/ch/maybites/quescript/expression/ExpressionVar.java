@@ -86,7 +86,7 @@ public class ExpressionVar {
 	 * Creates an ExpressionVar with an Evaluation Tree 
 	 * @param varValue
 	 */
-	protected ExpressionVar(Operation op, ArrayList<ExpressionVar> p){
+	public ExpressionVar(Operation op, ArrayList<ExpressionVar> p){
 		operation = op;
 		if(op.oper.equals("ARRAY") || op.oper.equals("[]")){
 			isArray = true;
@@ -103,7 +103,7 @@ public class ExpressionVar {
 	 * Creates an ExpressionVar Array with an Evaluation Tree 
 	 * @param varValue
 	 */
-	protected ExpressionVar(ArrayList<ExpressionVar> p){
+	public ExpressionVar(ArrayList<ExpressionVar> p){
 		operation = null;
 		params = p;
 		dValue = 0;

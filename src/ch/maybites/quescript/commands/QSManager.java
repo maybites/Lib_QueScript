@@ -25,6 +25,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import ch.maybites.quescript.QueMessage;
 import ch.maybites.quescript.OutputConnector;
+import ch.maybites.quescript.expression.ExpressionVar;
 import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.messages.CMsgTrigger;
 import ch.maybites.quescript.messages.ScriptMsgException;
@@ -108,6 +109,13 @@ public class QSManager implements OutputInterface{
 	    	stream.close();
 	    	
 	    	globalExprEnvironment = new RunTimeEnvironment();
+	
+			Calendar md = Calendar.getInstance();
+			// create those variables so they are there once we need them on creation time.
+			globalExprEnvironment.setLocalVariable("$HOUR", md.get(Calendar.HOUR_OF_DAY));
+			globalExprEnvironment.setLocalVariable("$MIN", md.get(Calendar.MINUTE));
+			globalExprEnvironment.setLocalVariable("$SEC", md.get(Calendar.SECOND));
+			globalExprEnvironment.setLocalVariable("$MILLI", md.get(Calendar.MILLISECOND));
 	    	
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -129,10 +137,10 @@ public class QSManager implements OutputInterface{
 		// and then keep on going
 
 		Calendar md = Calendar.getInstance();
-		globalExprEnvironment.setVariable("$HOUR", md.get(Calendar.HOUR_OF_DAY));
-		globalExprEnvironment.setVariable("$MIN", md.get(Calendar.MINUTE));
-		globalExprEnvironment.setVariable("$SEC", md.get(Calendar.SECOND));
-		globalExprEnvironment.setVariable("$MILLI", md.get(Calendar.MILLISECOND));
+		globalExprEnvironment.setLocalVariable("$HOUR", md.get(Calendar.HOUR_OF_DAY));
+		globalExprEnvironment.setLocalVariable("$MIN", md.get(Calendar.MINUTE));
+		globalExprEnvironment.setLocalVariable("$SEC", md.get(Calendar.SECOND));
+		globalExprEnvironment.setLocalVariable("$MILLI", md.get(Calendar.MILLISECOND));
 		
 		// make sure that no concurrent triggers get lost.
 		triggerQueCopy = triggerQueue;
@@ -150,7 +158,7 @@ public class QSManager implements OutputInterface{
 			lastviewTime = timer;
 			int outCounter = 0;
 			outputInfoMsg(QueMsgFactory.getMsg(SCRIPT).add("playtime").add(System.currentTimeMillis() - timer).done());
-			for(Cmnd child: myScript.getChildren()){
+			for(Cmnd child: myScript.getQues()){
 				CmndQue q = (CmndQue)child;
 				if(q.isPlaying){
 					outputInfoMsg(QueMsgFactory.getMsg(SCRIPT).add(outCounter).add(q.scriptLineSize).add(q.waitLineNumber - q.lineNumber).add("que("+q.queName+") "+q.waitLineMsg).add(1).done());
@@ -303,14 +311,27 @@ public class QSManager implements OutputInterface{
 
 	public void var(String name, double value){
 		if(globalExprEnvironment.containsVar(name)){
-			globalExprEnvironment.setVariable(name, value);
+			globalExprEnvironment.setLocalVariable(name, value);
 		}
 	}
 	
 	public void var(String name, String value){
 		if(globalExprEnvironment.containsVar(name)){
-			globalExprEnvironment.setVariable(name, value);
+			globalExprEnvironment.setLocalVariable(name, value);
 		}
+	}
+
+	public void var(String name, ArrayList<ExpressionVar> values){
+		if(globalExprEnvironment.containsVar(name)){
+			globalExprEnvironment.setLocalVariable(name, new ExpressionVar(values));
+		}
+	}
+
+	public void quevar(String _que, String _name, ArrayList<ExpressionVar> _values){
+		// we actually dont want quevar, because they set the <var>-defined variables,
+		// and they are reset to their initial expression every time the que restarts.
+		// this means, no variable ever set through this channel will be accessible
+		// myScript.getQue(_que).setQueVar(_name, _values);
 	}
 	
 	public void clearGlobalVars(){

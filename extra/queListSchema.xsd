@@ -65,9 +65,9 @@
 <xs:attribute name="until" type="xs:string"/> 
 <xs:attribute name="true" type="xs:string"/> 
 <xs:attribute name="false" type="xs:string"/> 
-<xs:attribute name="repeat" type="xs:string"/> 
-<xs:attribute name="start" type="xs:string"/> 
-<xs:attribute name="step" type="xs:string"/> 
+<xs:attribute name="condition" type="xs:string"/> 
+<xs:attribute name="init" type="xs:string"/> 
+<xs:attribute name="next" type="xs:string"/> 
 <xs:attribute name="sendto" type="xs:string" default="default"/> 
 
 <xs:element name="send" type="xs:string"/>
@@ -229,10 +229,10 @@
     		<xs:element ref="pause"/>
    			<xs:element ref="resume"/>
 		</xs:choice>
-	 	<xs:attribute ref="repeat" use="required"/> 
+	 	<xs:attribute ref="condition" use="required"/> 
 	 	<xs:attribute ref="name"/> 
-	 	<xs:attribute ref="start"/> 
-	 	<xs:attribute ref="step"/> 
+	 	<xs:attribute ref="init"/> 
+	 	<xs:attribute ref="next"/> 
 	</xs:complexType>
 </xs:element>
 

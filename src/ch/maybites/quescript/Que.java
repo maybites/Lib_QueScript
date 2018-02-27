@@ -1,11 +1,14 @@
 package ch.maybites.quescript;
 
+import java.util.ArrayList;
+
 import com.cycling74.max.Atom;
 import com.cycling74.max.DataTypes;
 import com.cycling74.max.MaxObject;
 
 import ch.maybites.quescript.commands.QSManager;
 import ch.maybites.quescript.commands.QueMsgFactory;
+import ch.maybites.quescript.expression.ExpressionVar;
 import ch.maybites.tools.Debugger;
 
 /**
@@ -53,7 +56,16 @@ public class Que extends MaxObject implements OutputConnector{
 	public void bang(){		
 		queManager.bang();
 	}
-	
+
+	/**
+	 * set global variable
+	 * @param name
+	 * @param val
+	 */
+	public void var(String name, int val){
+		queManager.var(name, val);
+	}
+
 	/**
 	 * set global variable
 	 * @param name
@@ -72,6 +84,50 @@ public class Que extends MaxObject implements OutputConnector{
 		queManager.var(name, val);
 	}
 	
+	/**
+	 * set global variable
+	 * @param name
+	 * @param val
+	 */
+	public void var(Atom[] val){
+		ArrayList<ExpressionVar> values = new ArrayList<ExpressionVar>();
+		for(int i = 1; i < val.length; i++){
+			if(val[i].isString())
+				values.add(new ExpressionVar(val[i].getString()));
+			else if(val[i].isFloat())
+				values.add(new ExpressionVar(val[i].getFloat()));
+			else if(val[i].isFloat())
+				values.add(new ExpressionVar(val[i].getInt()));
+		}
+		queManager.var(val[0].getString(), values);
+	}
+
+	/**
+	 * set a variable for a specific que
+	 * @param val
+	 */
+	public void quevar(Atom[] val){
+		// we actually dont want quevar, because they set the <var>-defined variables,
+		// and they are reset to their initial expression every time the que restarts.
+		// this means, no variable ever set through this channel will be accessible
+		/*
+		if(val.length >= 3){
+			ArrayList<ExpressionVar> values = new ArrayList<ExpressionVar>();
+			for(int i = 2; i < val.length; i++){
+				if(val[i].isString())
+					values.add(new ExpressionVar(val[i].getString()));
+				else if(val[i].isFloat())
+					values.add(new ExpressionVar(val[i].getFloat()));
+				else if(val[i].isFloat())
+					values.add(new ExpressionVar(val[i].getInt()));
+			}
+			queManager.quevar(val[0].getString(), val[1].getString(), values);
+		} else {
+			error("QueScript: quevar expects the follwing format: quescript 'quename' 'varname' value(s)... | but it received: " + val.toString());	
+		}
+		*/
+	}
+
 	/**
 	 * autostart = 1 will play the first que of the script upon loading the script
 	 * @param _autostart

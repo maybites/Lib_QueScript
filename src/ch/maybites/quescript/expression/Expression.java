@@ -683,9 +683,12 @@ public class Expression {
 				if(scopeToken == 2){
 					// the :: forces to create / overwrite a variable in local scope, no
 					// matter if there is a variable in a higher scope
-					ExpressionVar newvar = new ExpressionVar();
-					rt.setLocalVariable(token, newvar);					
-					stack.push(newvar);					
+					
+					// we first set a variable
+					rt.setLocalVariable(token, new ExpressionVar());	
+					// we need to get the reference of it if, since if it already existed, the old
+					// reference is what we want.
+					stack.push(rt.getLocalVar(token));					
 				} else {
 					// we take the variable found in whatever scope
 					stack.push(rt.getVar(token));
