@@ -12,12 +12,16 @@ public class CmndScript extends Cmnd{
 	
 	/** list with only que nodes */
 	private ArrayList<Cmnd> queChildren;
+	private ArrayList<Cmnd> playChildren;
+	private ArrayList<Cmnd> stopChildren;
 
 	OutputInterface output;
 
 	public CmndScript() {
 		super(null);
 		queChildren = new ArrayList<Cmnd>();
+		playChildren = new ArrayList<Cmnd>();
+		stopChildren = new ArrayList<Cmnd>();
 		super.setCmndName(NODE_NAME);
 	}
 	
@@ -27,6 +31,10 @@ public class CmndScript extends Cmnd{
 			child.setup(rt);
 			if(child.cmdName.equals(CmndQue.NODE_NAME)){
 				queChildren.add(child);
+			} else if(child.cmdName.equals(CmndInternal.NODE_NAME_STOP)){
+				stopChildren.add(child);
+			}else if(child.cmdName.equals(CmndInternal.NODE_NAME_PLAY)){
+				playChildren.add(child);
 			}
 		}
 	}
@@ -45,6 +53,22 @@ public class CmndScript extends Cmnd{
 	 */
 	public List<Cmnd> getQues(){
 		return queChildren;
+	}
+
+	/**
+	 * gets all this objects stops
+	 * @return
+	 */
+	public List<Cmnd> getStops(){
+		return stopChildren;
+	}
+
+	/**
+	 * gets all this objects plays
+	 * @return
+	 */
+	public List<Cmnd> getPlays(){
+		return playChildren;
 	}
 
 	/**

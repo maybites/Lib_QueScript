@@ -39,6 +39,22 @@ public class CmndInternal extends Cmnd {
 		if(debugMode)
 			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created internal "+ cmdName +"-Comnd for: " + name);	
 	}
+	
+	/**
+	 * checks if the attribute name is set
+	 * @return
+	 */
+	public boolean hasName(){
+		return (name == null)?false:true;
+	}
+	
+	/**
+	 * get the value of attribute name
+	 * @return
+	 */
+	public String getName(){
+		return name;
+	}
 
 	@Override
 	public void store(Node _parentElement) {

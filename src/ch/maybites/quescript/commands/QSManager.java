@@ -249,9 +249,7 @@ public class QSManager implements OutputInterface{
 				e.remove();
 			}
 		}
-				
-		String  firstQueName = null;
-		
+						
 		try {			
 		    // Validate Script against the XSD
 		    SAXSource source = new SAXSource(new InputSource(new java.io.FileInputStream(_filepath)));
@@ -266,12 +264,7 @@ public class QSManager implements OutputInterface{
 			myScript.build(document.getFirstChild());
 			myScript.setup(globalExprEnvironment);
 			
-			if(!myScript.getQues().isEmpty()){
-				firstQueName = ((CmndQue)myScript.getQues().get(0)).getQueName();
-				Debugger.info("QueScript", "loaded " +_filepath + " with " + myScript.getChildren().size() + " que's");
-			} else {
-				Debugger.error("QueScript", "loaded " +_filepath + " with " + myScript.getChildren().size() + " que's");
-			}
+			Debugger.info("QueScript", "loaded " +_filepath + " with " + myScript.getChildren().size() + " que's");
 											
 			outputInfoMsg(QueMsgFactory.getMsg(PARSING).add(PARSING_OK).done());
 
@@ -294,9 +287,44 @@ public class QSManager implements OutputInterface{
 			return;
 		}
 		
-		// if autostart is selected, play the first que of the new loaded file
-		if(autostart){
-			play(firstQueName);
+		// checking for a <stop> node to stop all ques still playing
+		for(Cmnd q: myScript.getStops()){
+			CmndInternal stop = (CmndInternal) q;
+			// all ques still playing need to be stopped:
+			for(Iterator<Cmnd> e = myScript.getQues().iterator(); e.hasNext();){
+				Cmnd cmd = e.next();
+				CmndQue que = (CmndQue)cmd;
+				if(que.isPlaying){
+					if(stop.hasName()){
+						// in this case we stop the indicated que:
+						if(que.queName.equals(stop.getName())){
+							que.clear();
+							e.remove();
+							Debugger.info("QueScript", "stopped que '" +que.queName + "'");
+						}
+					} else {
+						que.clear();
+						e.remove();
+						Debugger.info("QueScript", "stopped que '" + que.queName + "'");
+					}
+				}				
+			}
+		}
+
+
+		// checking for a <play> node to play all indicated ques
+		for(Cmnd q: myScript.getPlays()){
+			CmndInternal play = (CmndInternal) q;
+			// all ques still playing need to be stopped:
+			for(Iterator<Cmnd> e = myScript.getQues().iterator(); e.hasNext();){
+				Cmnd cmd = e.next();
+				CmndQue que = (CmndQue)cmd;
+				// in this case we play the indicated que:
+				if(que.queName.equals(play.getName())){
+					Debugger.info("QueScript", "autostarted que '" + que.queName + "'");
+					que.play(debugMode);
+				}
+			}
 		}
 				
 		outputInfoMsg(QueMsgFactory.getMsg(QUELIST).add(QUELIST_START).done());

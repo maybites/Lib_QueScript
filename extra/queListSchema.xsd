@@ -293,6 +293,8 @@
 	<xs:complexType mixed="true">
 		<xs:sequence>
 			<xs:element ref="var" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="stop" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="play" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element ref="que" minOccurs="1" maxOccurs="unbounded"/>
 		</xs:sequence>
 	</xs:complexType>
