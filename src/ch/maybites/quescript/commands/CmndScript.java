@@ -3,6 +3,8 @@ package ch.maybites.quescript.commands;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.w3c.dom.Node;
+
 import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.ScriptMsgException;
@@ -25,10 +27,12 @@ public class CmndScript extends Cmnd{
 		super.setCmndName(NODE_NAME);
 	}
 	
-	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
+	public void build(Node _xmlNode) throws ScriptMsgException{
+		super.build(_xmlNode);
 		queChildren.clear();
+		stopChildren.clear();
+		playChildren.clear();
 		for(Cmnd child: this.getChildren()){
-			child.setup(rt);
 			if(child.cmdName.equals(CmndQue.NODE_NAME)){
 				queChildren.add(child);
 			} else if(child.cmdName.equals(CmndInternal.NODE_NAME_STOP)){
@@ -36,6 +40,12 @@ public class CmndScript extends Cmnd{
 			}else if(child.cmdName.equals(CmndInternal.NODE_NAME_PLAY)){
 				playChildren.add(child);
 			}
+		}
+	}
+		
+	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
+		for(Cmnd child: this.getChildren()){
+			child.setup(rt);
 		}
 	}
 
