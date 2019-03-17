@@ -9,7 +9,7 @@ import ch.maybites.quescript.expression.Expression.ExpressionException;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.CMsgTime;
 import ch.maybites.quescript.messages.ScriptMsgException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class CmndWait extends Cmnd {
 	protected static String NODE_NAME = "wait";
@@ -101,14 +101,14 @@ public class CmndWait extends Cmnd {
 				}
 				
 				if(debugMode)
-					Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created Wait Cmnd with mode = " + smode);
+					Debug.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created Wait Cmnd with mode = " + smode);
 			} catch (ScriptMsgException e) {
 					throw new ScriptMsgException("<wait>: Attribute Expression: " + e.getMessage());
 			} catch (ExpressionException e) {
 				throw new ScriptMsgException("Command <wait>: Attribute Expression: " + e.getMessage());
 			}
 		} else {
-			Debugger.error("Script - Command <wait>", "only one of these attibutes are allowed: " + this.getAttributeList());			
+			Debug.error("Script - Command <wait>", "only one of these attibutes are allowed: " + this.getAttributeList());			
 			throw new ScriptMsgException("<wait>: illegal attribute");
 		}	
 	}
@@ -202,7 +202,7 @@ public class CmndWait extends Cmnd {
 				if(untilWhileCondition.eval().getNumberValue() == 0)
 					return true;
 			} catch (ExpressionException e) {
-				Debugger.error("Script - Command <wait>", "while condition: " + e.getLocalizedMessage());			
+				Debug.error("Script - Command <wait>", "while condition: " + e.getLocalizedMessage());			
 			}
 			break;
 		case MODE_UNTIL:
@@ -210,7 +210,7 @@ public class CmndWait extends Cmnd {
 				if(untilWhileCondition.eval().getNumberValue() == 1)
 					return true;
 			} catch (ExpressionException e) {
-				Debugger.error("Script - Command <wait>", "until condition: " + e.getLocalizedMessage());			
+				Debug.error("Script - Command <wait>", "until condition: " + e.getLocalizedMessage());			
 			}
 			break;
 		case MODE_HOURGLASS:

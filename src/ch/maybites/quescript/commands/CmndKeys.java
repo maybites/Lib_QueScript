@@ -6,7 +6,7 @@ import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.CMsgTime;
 import ch.maybites.quescript.messages.ScriptMsgException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class CmndKeys extends Cmnd {
 	public static String NODE_NAME = "keys";
@@ -38,7 +38,7 @@ public class CmndKeys extends Cmnd {
 		parse(super.content);		
 
 		if(debugMode)
-			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created keys Comnd");			
+			Debug.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created keys Comnd");			
 	}
 
 	/**

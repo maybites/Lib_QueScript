@@ -9,7 +9,7 @@ import ch.maybites.quescript.expression.ExpressionVar;
 import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.ScriptMsgException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class CmndDebugger extends Cmnd {
 	protected static String NODE_NAME = "debugger";
@@ -61,7 +61,7 @@ public class CmndDebugger extends Cmnd {
 		}
 
 		if(debugMode)
-			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created "+cmdName+"-Comnd");			
+			Debug.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created "+cmdName+"-Comnd");			
 	}
 
 	@Override

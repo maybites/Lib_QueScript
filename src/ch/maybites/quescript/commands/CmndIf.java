@@ -8,7 +8,7 @@ import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.expression.Expression.ExpressionException;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.ScriptMsgException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class CmndIf extends Cmnd {
 	protected static String NODE_NAME = "if";
@@ -68,12 +68,12 @@ public class CmndIf extends Cmnd {
 				throw new ScriptMsgException("Command <if>: Attribute Expression: " + e.getMessage());
 			}
 		} else {
-			Debugger.error("Script - Command <if>", "only one of these attibutes are allowed: " + this.getAttributeList());			
+			Debug.error("Script - Command <if>", "only one of these attibutes are allowed: " + this.getAttributeList());			
 			throw new ScriptMsgException("<if>: illegal attribute");
 		}	
 	
 		if(debugMode)
-			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created If Cmnd: " + getAttributeValue(smode));
+			Debug.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created If Cmnd: " + getAttributeValue(smode));
 
 		// Make sure the que- and local- variables are created before the children are parsed
 		for(Cmnd child: this.getChildren()){
@@ -103,7 +103,7 @@ public class CmndIf extends Cmnd {
 					}
 				}
 			} catch (ExpressionException e) {
-				Debugger.error("Script - Command <if>", "if condition: " + e.getMessage());			
+				Debug.error("Script - Command <if>", "if condition: " + e.getMessage());			
 			}
 		}
 	}
@@ -122,7 +122,7 @@ public class CmndIf extends Cmnd {
 				}
 			}
 		} catch (ExpressionException e) {
-			Debugger.error("Script - Command <if>", "if condition: " + e.getMessage());			
+			Debug.error("Script - Command <if>", "if condition: " + e.getMessage());			
 		}
 	}
 			

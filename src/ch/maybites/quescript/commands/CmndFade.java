@@ -8,7 +8,7 @@ import ch.maybites.quescript.messages.CMsgFade;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.CMsgTime;
 import ch.maybites.quescript.messages.ScriptMsgException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class CmndFade extends Cmnd {
 	protected static String NODE_NAME = "fade";
@@ -43,7 +43,7 @@ public class CmndFade extends Cmnd {
 			name = getAttributeValue(ATTR_NAME);
 
 		if(debugMode)
-			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+"created fade Comnd");	
+			Debug.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+"created fade Comnd");	
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class CmndFade extends Cmnd {
 
 	public void lockLessBang(CMsgShuttle _msg){
 		if(_msg.isDebugging())
-			Debugger.verbose("QueScript", "que("+parentNode.getQueName()+") sent fade message");
+			Debug.verbose("QueScript", "que("+parentNode.getQueName()+") sent fade message");
 
 		_msg.addMessage(new CMsgFade(name, fadetime));
 	}

@@ -9,7 +9,7 @@ import ch.maybites.quescript.expression.Expression.ExpressionException;
 import ch.maybites.quescript.messages.CMsgAnim;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.ScriptMsgException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class CmndWhile extends Cmnd {
 	protected static String NODE_NAME = "while";
@@ -82,7 +82,7 @@ public class CmndWhile extends Cmnd {
 		}
 
 		if(debugMode)
-			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created while Cmnd: " + getAttributeValue(ATTR_CONDITION));
+			Debug.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created while Cmnd: " + getAttributeValue(ATTR_CONDITION));
 
 		// Make sure the que- and local- variables are created before the children are parsed
 		for(Cmnd child: this.getChildren()){
@@ -124,7 +124,7 @@ public class CmndWhile extends Cmnd {
 						_msg.addMessage(new CMsgAnim(name));
 				}
 			} catch (ExpressionException e) {
-				Debugger.error("Script - Command <while>", "while expression: " + e.getMessage());			
+				Debug.error("Script - Command <while>", "while expression: " + e.getMessage());			
 			}
 		}
 	}

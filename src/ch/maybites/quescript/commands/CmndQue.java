@@ -6,7 +6,7 @@ import org.w3c.dom.Node;
 
 import ch.maybites.quescript.expression.*;
 import ch.maybites.quescript.messages.*;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class CmndQue extends Cmnd{
 	public static String NODE_NAME = "que";
@@ -54,7 +54,7 @@ public class CmndQue extends Cmnd{
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
 		prt = new RunTimeEnvironment(rt);
 		if(debugMode)
-			Debugger.verbose("QueScript - NodeFactory", "... created Que:" + queName + " at " + lineNumber);	
+			Debug.verbose("QueScript - NodeFactory", "... created Que:" + queName + " at " + lineNumber);	
 
 		prt.setLocalVariable("$TIMER", 0);
 		for(Cmnd child: this.getChildren()){
@@ -121,7 +121,7 @@ public class CmndQue extends Cmnd{
 	public void shutDown(){
 		if(executionShuttle.isInExecution()){
 			if(executionShuttle.isDebugging())
-				Debugger.verbose("QueScript", "...shuting down: " + this.queName);	
+				Debug.verbose("QueScript", "...shuting down: " + this.queName);	
 			executionShuttle.shutDown();
 			
 			//TODO on execution stop the waitlock needs to be removed and should not
@@ -138,7 +138,7 @@ public class CmndQue extends Cmnd{
 		executionShuttle.off();
 		isPlaying = false;
 		if(executionShuttle.isDebugging())
-			Debugger.verbose("QueScript", "stop: " + this.queName);	
+			Debug.verbose("QueScript", "stop: " + this.queName);	
 	}
 
 	/**
@@ -158,7 +158,7 @@ public class CmndQue extends Cmnd{
 				if(!executionShuttle.isWaitLocked() && !isLooping){
 					executionShuttle.shutDown();
 					if(executionShuttle.isDebugging())
-						Debugger.verbose("QueScript", "... shuting down: " + this.queName);	
+						Debug.verbose("QueScript", "... shuting down: " + this.queName);	
 				}
 			}  else if(executionShuttle.isInShutDownMode()){
 				// the create the frame Timer
@@ -166,7 +166,7 @@ public class CmndQue extends Cmnd{
 				bang(executionShuttle);
 				if(!executionShuttle.hasNodesInShutDown()){
 					if(executionShuttle.isDebugging())
-						Debugger.verbose("QueScript", "stop: " + this.queName);	
+						Debug.verbose("QueScript", "stop: " + this.queName);	
 					executionShuttle.off();
 					isPlaying = false;
 				}

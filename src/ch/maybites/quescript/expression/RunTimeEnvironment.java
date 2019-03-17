@@ -36,7 +36,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import ch.maybites.quescript.expression.Expression.ExpressionException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class RunTimeEnvironment {
 	/**

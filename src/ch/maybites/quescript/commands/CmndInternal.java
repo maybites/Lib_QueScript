@@ -5,7 +5,7 @@ import org.w3c.dom.Node;
 import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.ScriptMsgException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class CmndInternal extends Cmnd {
 	public static String NODE_NAME_STOP = "stop";
@@ -37,7 +37,7 @@ public class CmndInternal extends Cmnd {
 	 */
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
 		if(debugMode)
-			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created internal "+ cmdName +"-Comnd for: " + name);	
+			Debug.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created internal "+ cmdName +"-Comnd for: " + name);	
 	}
 	
 	/**
@@ -73,7 +73,7 @@ public class CmndInternal extends Cmnd {
 		if(!_msg.isInStopMode()){
 			this.getOutput().selfCommand(new String[]{cmdName, parentNode.getQueName(), name});
 			if(debugMode)
-				Debugger.verbose("QueScript "+cmdName+"-Command que:(" + parentNode.getQueName() + ")", "sent "+cmdName+"-message to "+cmdName+": " + name);
+				Debug.verbose("QueScript "+cmdName+"-Command que:(" + parentNode.getQueName() + ")", "sent "+cmdName+"-message to "+cmdName+": " + name);
 		}
 	}
 

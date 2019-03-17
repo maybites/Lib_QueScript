@@ -14,7 +14,7 @@ import ch.maybites.quescript.messages.CMsgFadedOut;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.CMsgTime;
 import ch.maybites.quescript.messages.ScriptMsgException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class CmndAnim extends Cmnd {
 	public static String NODE_NAME = "anim";
@@ -81,7 +81,7 @@ public class CmndAnim extends Cmnd {
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{		
     	prt = new RunTimeEnvironment(rt);
 		if(debugMode)
-			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created Anim Comnd: name='" + name +"'");	
+			Debug.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created Anim Comnd: name='" + name +"'");	
 
 		// first the attribute values
 		String expr = "notset";

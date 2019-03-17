@@ -8,7 +8,7 @@ import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.expression.Expression.ExpressionException;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.ScriptMsgException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class CmndExpr extends Cmnd {
 	protected static String NODE_NAME = "expr";
@@ -34,7 +34,7 @@ public class CmndExpr extends Cmnd {
 			throw new ScriptMsgException("QueScript - Command <expr>: Value Expression: " + e.getMessage());
 		}
 		if(debugMode)
-			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+"created expr-Comnd = "+ super.content);	
+			Debug.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+"created expr-Comnd = "+ super.content);	
 
 	}
 
@@ -48,7 +48,7 @@ public class CmndExpr extends Cmnd {
 		try {
 			variable.eval();
 		} catch (ExpressionException e) {
-			Debugger.error("QueScript que("+parentNode.getQueName()+") - Command <expr>: Value Expression", e.getMessage());
+			Debug.error("QueScript que("+parentNode.getQueName()+") - Command <expr>: Value Expression", e.getMessage());
 		}
 	}
 

@@ -29,7 +29,7 @@ import ch.maybites.quescript.expression.ExpressionVar;
 import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.messages.CMsgTrigger;
 import ch.maybites.quescript.messages.ScriptMsgException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 /**
  * 
@@ -264,24 +264,24 @@ public class QSManager implements OutputInterface{
 			myScript.build(document.getFirstChild());
 			myScript.setup(globalExprEnvironment);
 			
-			Debugger.info("QueScript", "loaded " +_filepath + " with " + myScript.getChildren().size() + " que's");
+			Debug.info("QueScript", "loaded " +_filepath + " with " + myScript.getChildren().size() + " que's");
 											
 			outputInfoMsg(QueMsgFactory.getMsg(PARSING).add(PARSING_OK).done());
 
 		} catch (SAXParseException e) {
-			Debugger.error("QueScript", "Error at line[" + e.getLineNumber() + 
+			Debug.error("QueScript", "Error at line[" + e.getLineNumber() + 
 					"] col[" + e.getColumnNumber() + "]: " + 
 					e.getMessage().substring(e.getMessage().indexOf(":")+1));
 			outputInfoMsg(QueMsgFactory.getMsg(PARSING).add(PARSING_ERROR).add(e.getMessage().substring(e.getMessage().indexOf(":")+1) + " at line(" + e.getLineNumber() + ") col(" + e.getColumnNumber() + ")").done());
 			return;
 
 		} catch (ScriptMsgException e) {
-			Debugger.error("QueScript", "Error: " + e.getMessage());
+			Debug.error("QueScript", "Error: " + e.getMessage());
 			outputInfoMsg(QueMsgFactory.getMsg(PARSING).add(PARSING_ERROR).add(e.getMessage()).done());
 			return;
 
 		} catch (Exception e) {
-			Debugger.error("QueScript", "DocumentBuilder Exceptions:" + e.getMessage());
+			Debug.error("QueScript", "DocumentBuilder Exceptions:" + e.getMessage());
 			outputInfoMsg(QueMsgFactory.getMsg(PARSING).add(PARSING_ERROR).add(e.getMessage()).done());
 			e.printStackTrace();
 			return;
@@ -300,12 +300,12 @@ public class QSManager implements OutputInterface{
 						if(que.queName.equals(stop.getName())){
 							que.clear();
 							e.remove();
-							Debugger.info("QueScript", "stopped que '" +que.queName + "'");
+							Debug.info("QueScript", "stopped que '" +que.queName + "'");
 						}
 					} else {
 						que.clear();
 						e.remove();
-						Debugger.info("QueScript", "stopped que '" + que.queName + "'");
+						Debug.info("QueScript", "stopped que '" + que.queName + "'");
 					}
 				}				
 			}
@@ -321,7 +321,7 @@ public class QSManager implements OutputInterface{
 				CmndQue que = (CmndQue)cmd;
 				// in this case we play the indicated que:
 				if(que.queName.equals(play.getName())){
-					Debugger.info("QueScript", "autostarted que '" + que.queName + "'");
+					Debug.info("QueScript", "autostarted que '" + que.queName + "'");
 					que.play(debugMode);
 				}
 			}
@@ -379,10 +379,10 @@ public class QSManager implements OutputInterface{
 
 		if(myScript.hasQue(_queName)){
 			if(debugMode)
-				Debugger.verbose("QueScript", "play... :" + _queName);	
+				Debug.verbose("QueScript", "play... :" + _queName);	
 			myScript.getQue(_queName).play(debugMode);
 			if(debugMode)
-				Debugger.verbose("QueScript", "... play :" + _queName);	
+				Debug.verbose("QueScript", "... play :" + _queName);	
 		}
 	}
 	
@@ -391,12 +391,12 @@ public class QSManager implements OutputInterface{
 	 */
 	public void shutdown(){
 		if(debugMode)
-			Debugger.verbose("QueScript", "shuting down... : all");	
+			Debug.verbose("QueScript", "shuting down... : all");	
 		for(Cmnd e: myScript.getQues()){
 			((CmndQue)e).shutDown();
 		}
 		if(debugMode)
-			Debugger.verbose("QueScript", "... shut all down");	
+			Debug.verbose("QueScript", "... shut all down");	
 	}
 
 	/**
@@ -408,10 +408,10 @@ public class QSManager implements OutputInterface{
 			CmndQue _next = (CmndQue)e;
 			if(_next.queName.equals(_name)){
 				if(debugMode)
-					Debugger.verbose("QueScript", "shutDown... : " + _name);	
+					Debug.verbose("QueScript", "shutDown... : " + _name);	
 				_next.shutDown();
 				if(debugMode)
-					Debugger.verbose("QueScript", ".... shutDown : " + _name);	
+					Debug.verbose("QueScript", ".... shutDown : " + _name);	
 			}
 		}
 	}
@@ -425,10 +425,10 @@ public class QSManager implements OutputInterface{
 			CmndQue _next = (CmndQue)e;
 			if(!_next.queName.equals(_exceptionName)){
 				if(debugMode)
-					Debugger.verbose("QueScript", "shutDownExcept.... : " + _exceptionName);	
+					Debug.verbose("QueScript", "shutDownExcept.... : " + _exceptionName);	
 				_next.shutDown();
 				if(debugMode)
-					Debugger.verbose("QueScript", ".... shutDownExcept: " + _exceptionName);	
+					Debug.verbose("QueScript", ".... shutDownExcept: " + _exceptionName);	
 			}
 		}
 	}
@@ -438,12 +438,12 @@ public class QSManager implements OutputInterface{
 	 */
 	public void resume(){
 		if(debugMode)
-			Debugger.verbose("QueScript", "resume all executed que's");	
+			Debug.verbose("QueScript", "resume all executed que's");	
 		for(Cmnd e: myScript.getQues()){
 			((CmndQue)e).resume();
 		}
 		if(debugMode)
-			Debugger.verbose("QueScript", "... all paused que's are resumed");	
+			Debug.verbose("QueScript", "... all paused que's are resumed");	
 	}
 
 	/**
@@ -455,10 +455,10 @@ public class QSManager implements OutputInterface{
 			CmndQue _next = (CmndQue)e;
 			if(_next.queName.equals(_name)){
 				if(debugMode)
-					Debugger.verbose("QueScript", "resume paused que: " + _name);	
+					Debug.verbose("QueScript", "resume paused que: " + _name);	
 				_next.resume();
 				if(debugMode)
-					Debugger.verbose("QueScript", "... paused que is resumed playing: " + _name);	
+					Debug.verbose("QueScript", "... paused que is resumed playing: " + _name);	
 			}
 		}
 	}
@@ -468,12 +468,12 @@ public class QSManager implements OutputInterface{
 	 */
 	public void pause(){
 		if(debugMode)
-			Debugger.verbose("QueScript", "pause all executed que's");	
+			Debug.verbose("QueScript", "pause all executed que's");	
 		for(Cmnd e: myScript.getQues()){
 			((CmndQue)e).pause();
 		}
 		if(debugMode)
-			Debugger.verbose("QueScript", "... all executed que's are paused");	
+			Debug.verbose("QueScript", "... all executed que's are paused");	
 	}
 
 	/**
@@ -485,10 +485,10 @@ public class QSManager implements OutputInterface{
 			CmndQue _next = (CmndQue)e;
 			if(_next.queName.equals(_name)){
 				if(debugMode)
-					Debugger.verbose("QueScript", "pause executed que: " + _name);	
+					Debug.verbose("QueScript", "pause executed que: " + _name);	
 				_next.pause();
 				if(debugMode)
-					Debugger.verbose("QueScript", "... executed que is paused: " + _name);	
+					Debug.verbose("QueScript", "... executed que is paused: " + _name);	
 			}
 		}
 	}
@@ -502,10 +502,10 @@ public class QSManager implements OutputInterface{
 			CmndQue _next = (CmndQue)e;
 			if(!_next.queName.equals(_exceptionName)){
 				if(debugMode)
-					Debugger.verbose("QueScript", "pause all, except.... : " + _exceptionName);	
+					Debug.verbose("QueScript", "pause all, except.... : " + _exceptionName);	
 				_next.pause();
 				if(debugMode)
-					Debugger.verbose("QueScript", "... paused all, except: " + _exceptionName);	
+					Debug.verbose("QueScript", "... paused all, except: " + _exceptionName);	
 			}
 		}
 	}
@@ -517,12 +517,12 @@ public class QSManager implements OutputInterface{
 		outputInfoMsg(QueMsgFactory.getMsg(QUELIST).add(QUELIST_STOP).done());
 
 		if(debugMode)
-			Debugger.verbose("QueScript", "stoping all...");	
+			Debug.verbose("QueScript", "stoping all...");	
 		for(Cmnd e: myScript.getQues()){
 			((CmndQue)e).stop();
 		}
 		if(debugMode)
-			Debugger.verbose("QueScript", "... all stopped");	
+			Debug.verbose("QueScript", "... all stopped");	
 	}
 
 	/**
@@ -534,10 +534,10 @@ public class QSManager implements OutputInterface{
 			CmndQue _next = (CmndQue)e;
 			if(_next.queName.equals(_name)){
 				if(debugMode)
-					Debugger.verbose("QueScript", "stopping... : " + _name);	
+					Debug.verbose("QueScript", "stopping... : " + _name);	
 				_next.stop();
 				if(debugMode)
-					Debugger.verbose("QueScript", "...stopped: " + _name);	
+					Debug.verbose("QueScript", "...stopped: " + _name);	
 			}
 		}
 	}
@@ -551,10 +551,10 @@ public class QSManager implements OutputInterface{
 			CmndQue _next = (CmndQue)e;
 			if(!_next.queName.equals(_exceptionName)){
 				if(debugMode)
-					Debugger.verbose("QueScript", "stopExcept.... : " + _exceptionName);	
+					Debug.verbose("QueScript", "stopExcept.... : " + _exceptionName);	
 				_next.stop();
 				if(debugMode)
-					Debugger.verbose("QueScript", "... stopped Except: " + _exceptionName);	
+					Debug.verbose("QueScript", "... stopped Except: " + _exceptionName);	
 			}
 		}
 	}
@@ -575,12 +575,12 @@ public class QSManager implements OutputInterface{
 				if(!myScript.getQues().isEmpty()){
 					String firstQueName = ((CmndQue)myScript.getQues().get(0)).getQueName();
 					play(firstQueName);
-					Debugger.info("QueScript", "autostarted: " + firstQueName);
+					Debug.info("QueScript", "autostarted: " + firstQueName);
 				} else {
-					Debugger.warning("QueScript", "autostart failed due to missing que in script.");
+					Debug.warning("QueScript", "autostart failed due to missing que in script.");
 				}
 			} else {
-				Debugger.warning("QueScript", "autostart didnt start first que due to already playing ques.");
+				Debug.warning("QueScript", "autostart didnt start first que due to already playing ques.");
 			}
 		}
 	}
@@ -610,7 +610,7 @@ public class QSManager implements OutputInterface{
 		}
 
 		private void printInfo(SAXParseException e) {
-			Debugger.error("QueScript", "Error at line(" + e.getLineNumber() + ") col(" + e.getColumnNumber() + 
+			Debug.error("QueScript", "Error at line(" + e.getLineNumber() + ") col(" + e.getColumnNumber() + 
 					"): " + e.getMessage().substring(e.getMessage().indexOf(":")+2));
 		}
 	}

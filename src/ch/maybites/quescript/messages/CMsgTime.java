@@ -4,7 +4,7 @@ import java.util.Calendar;
 
 import ch.maybites.quescript.expression.ExpressionVar;
 import ch.maybites.quescript.expression.Expression.ExpressionException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class CMsgTime {
 	final static int MILS = 0;
@@ -90,7 +90,7 @@ public class CMsgTime {
 		try {
 			mills.eval();
 		} catch (ExpressionException e) {
-			Debugger.error("QueScript", "Expression Runtime Exception :" + e.getMessage());	
+			Debug.error("QueScript", "Expression Runtime Exception :" + e.getMessage());	
 		}
 		if(mills.isNumber){
 			return (long)mills.getNumberValue() + diffMills;
@@ -98,7 +98,7 @@ public class CMsgTime {
 			try {
 				return parse(mills.getStringValue())  + diffMills;
 			} catch (ScriptMsgException e) {
-				Debugger.error("QueScript", "Expression Runtime Exception :" + e.getMessage());	
+				Debug.error("QueScript", "Expression Runtime Exception :" + e.getMessage());	
 			}
 		}
 		return 0;
@@ -167,7 +167,7 @@ public class CMsgTime {
 		try {
 			return new CMsgTime(mills, diffMills);
 		} catch (ScriptMsgException e) {
-			Debugger.fatal("QueScript", "Unable to clone Time: Expression Runtime Exception :" + e.getMessage());	
+			Debug.fatal("QueScript", "Unable to clone Time: Expression Runtime Exception :" + e.getMessage());	
 		}
 		return null;
 	}

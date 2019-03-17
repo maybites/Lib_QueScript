@@ -1,6 +1,6 @@
 package ch.maybites.quescript.messages;
 
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class CMsgFade implements CMsgInterface{
 	String rampName = null;
@@ -19,7 +19,7 @@ public class CMsgFade implements CMsgInterface{
 					time = new CMsgTime("1ms");
 				}
 			} catch (ScriptMsgException e) {
-				Debugger.error("Script Parsing: Command Fade", e.getMessage());			
+				Debug.error("Script Parsing: Command Fade", e.getMessage());			
 			}			
 		}
 	}

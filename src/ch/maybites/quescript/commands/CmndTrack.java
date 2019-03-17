@@ -13,7 +13,7 @@ import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.expression.Expression.ExpressionException;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.ScriptMsgException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class CmndTrack extends Cmnd {
 	public static String NODE_NAME = "track";
@@ -90,7 +90,7 @@ public class CmndTrack extends Cmnd {
 			fadeTo = keyValues[0];
 
 		if(debugMode)
-			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created track-Comnd: name='" + trackName + "' | " + super.content);	
+			Debug.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created track-Comnd: name='" + trackName + "' | " + super.content);	
 
 		// and then do it for all the children
 		for(Cmnd child: this.getChildren()){
@@ -134,7 +134,7 @@ public class CmndTrack extends Cmnd {
 				calculatedValue.setValue(keyValues[keyValues.length -1].getNumberValue());
 			}
 		} catch (ExpressionException e) {
-			Debugger.error("QueScript que("+parentNode.getQueName()+") "+cmdName+" Comnd", e.getMessage());	
+			Debug.error("QueScript que("+parentNode.getQueName()+") "+cmdName+" Comnd", e.getMessage());	
 		}
 	}
 	

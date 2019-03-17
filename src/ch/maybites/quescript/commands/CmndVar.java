@@ -10,7 +10,7 @@ import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.expression.Expression.ExpressionException;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.ScriptMsgException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class CmndVar extends Cmnd {
 	protected static String NODE_NAME = "var";
@@ -66,11 +66,11 @@ public class CmndVar extends Cmnd {
 				//     altered by them, so we can't afford to break these references. 
 				prt.setLocalVariable(name, varValue);
 			} catch (ExpressionException e) {
-				Debugger.error("QueScript que("+parentNode.getQueName()+") - Command <var>: Value Expression", e.getMessage());
+				Debug.error("QueScript que("+parentNode.getQueName()+") - Command <var>: Value Expression", e.getMessage());
 			}
 
 			if(debugMode)
-				Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+"created var-Comnd = "+ super.content);	
+				Debug.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+"created var-Comnd = "+ super.content);	
 			
 		} else {
 			throw new ScriptMsgException("QueScript - Command <var>: Expression missing at line(" + lineNumber + ")");			
@@ -89,7 +89,7 @@ public class CmndVar extends Cmnd {
 			// so we can simply pass on the evaluation of the initial expression
 			prt.setLocalVariable(name, myExpression.eval());
 		} catch (ExpressionException e) {
-			Debugger.error("QueScript que("+parentNode.getQueName()+") - Command <var>: Value Expression", e.getMessage());
+			Debug.error("QueScript que("+parentNode.getQueName()+") - Command <var>: Value Expression", e.getMessage());
 		}
 	}
 

@@ -12,7 +12,7 @@ import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.expression.Expression.ExpressionException;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.ScriptMsgException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class CmndMessage extends Cmnd {
 	public static String NODE_NAME_SEND 	= "send";
@@ -89,7 +89,7 @@ public class CmndMessage extends Cmnd {
 		}
 		
 		if(debugMode)
-			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created "+cmdName+"-Comnd = '"+super.content+"'");			
+			Debug.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created "+cmdName+"-Comnd = '"+super.content+"'");			
 
 		// and then do it for all the children
 		for(Cmnd child: this.getChildren()){
@@ -105,7 +105,7 @@ public class CmndMessage extends Cmnd {
 			myMessage.eval();
 			getOutput().outputSendMsg(myMessage);
 		} catch (ExpressionException e) {
-			Debugger.error("Script - Command <" + cmdName +">", "expression evaluation error: " + e.getMessage() + " at line("+lineNumber+")");			
+			Debug.error("Script - Command <" + cmdName +">", "expression evaluation error: " + e.getMessage() + " at line("+lineNumber+")");			
 		}
 	}
 	

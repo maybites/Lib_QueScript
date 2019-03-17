@@ -17,7 +17,7 @@ import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.CMsgTime;
 import ch.maybites.quescript.messages.CMsgTrigger;
 import ch.maybites.quescript.messages.ScriptMsgException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public abstract class Cmnd{
 
@@ -141,7 +141,7 @@ public abstract class Cmnd{
 					else if(childName.equals(CmndInternal.NODE_NAME_SHUTDOWN))
 						child = new CmndInternal(this, CmndInternal.NODE_NAME_SHUTDOWN);
 					else
-						Debugger.verbose("NodeFactory", "found invalid child node: name = '"+childName+"'");			
+						Debug.verbose("NodeFactory", "found invalid child node: name = '"+childName+"'");			
 
 					if(child != null){
 						child.setDebugMode(debugMode);

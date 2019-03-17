@@ -5,7 +5,7 @@ import org.w3c.dom.Node;
 import ch.maybites.quescript.expression.RunTimeEnvironment;
 import ch.maybites.quescript.messages.CMsgShuttle;
 import ch.maybites.quescript.messages.ScriptMsgException;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 public class CmndTimer extends Cmnd {
 	protected static String NODE_NAME = "timer";
@@ -24,7 +24,7 @@ public class CmndTimer extends Cmnd {
 	 */
 	public void setup(RunTimeEnvironment rt)throws ScriptMsgException{
 		if(debugMode)
-			Debugger.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created "+cmdName+"-Comnd");			
+			Debug.verbose("QueScript - NodeFactory", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created "+cmdName+"-Comnd");			
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public class CmndTimer extends Cmnd {
 		if(!_msg.isWaitLocked()){
 			_msg.setTimer();
 			if(_msg.isDebugging())
-				Debugger.verbose("QueScript - Command Timer", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created timer = '"+_msg.getTimerTime().print()+"'");			
+				Debug.verbose("QueScript - Command Timer", "que("+parentNode.getQueName()+") "+new String(new char[getLevel()]).replace('\0', '_')+" created timer = '"+_msg.getTimerTime().print()+"'");			
 		}
 	}
 

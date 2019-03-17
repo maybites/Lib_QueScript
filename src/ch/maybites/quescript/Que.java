@@ -9,7 +9,7 @@ import com.cycling74.max.MaxObject;
 import ch.maybites.quescript.commands.QSManager;
 import ch.maybites.quescript.commands.QueMsgFactory;
 import ch.maybites.quescript.expression.ExpressionVar;
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 
 /**
  * QueScript External for MaxMSP
@@ -254,17 +254,17 @@ public class Que extends MaxObject implements OutputConnector{
 	 */
 	public void java_debug(String _level){
 		if(_level.equals("verbose"))
-			Debugger.setLevelToVerbose();
+			Debug.setLevelToVerbose();
 		else if(_level.equals("debug"))
-			Debugger.setLevelToDebug();
+			Debug.setLevelToDebug();
 		else if(_level.equals("info"))
-			Debugger.setLevelToInfo();
+			Debug.setLevelToInfo();
 		else if(_level.equals("warning"))
-			Debugger.setLevelToWarning();
+			Debug.setLevelToWarning();
 		else if(_level.equals("error"))
-			Debugger.setLevelToError();
+			Debug.setLevelToError();
 		else if(_level.equals("fatal"))
-			Debugger.setLevelToFatal();
+			Debug.setLevelToFatal();
 	}
 
 	public void outputSendMsg(QueMessage msg) {
