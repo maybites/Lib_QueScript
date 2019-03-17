@@ -153,7 +153,7 @@ public class QSManager implements OutputInterface{
 //			Debugger.verbose("QueScript", "... banged: " + nextElement.getQueName());	
 		}
 		triggerQueue.clear();
-
+		
 		if(viewplayingquesFreq > 0 && lastviewTime + (1000 / viewplayingquesFreq) < timer ){
 			lastviewTime = timer;
 			int outCounter = 0;
@@ -262,6 +262,33 @@ public class QSManager implements OutputInterface{
 			document.getDocumentElement().normalize();	
 						
 			myScript.build(document.getFirstChild());
+			
+			// checking for a <stop> node to stop all ques still playing
+			for(Cmnd q: myScript.getStops()){
+				CmndInternal stop = (CmndInternal) q;
+				// all ques still playing need to be stopped:
+				for(Iterator<Cmnd> e = myScript.getQues().iterator(); e.hasNext();){
+					Cmnd cmd = e.next();
+					CmndQue que = (CmndQue)cmd;
+					if(que.isPlaying){
+						if(stop.hasName()){
+							// in this case we stop the indicated que:
+							if(que.queName.equals(stop.getName())){
+								que.stop();
+								que.clear();
+								e.remove();
+								Debugger.info("QueScript", "stopped que '" +que.queName + "'");
+							}
+						} else {
+							que.stop();
+							que.clear();
+							e.remove();
+							Debugger.info("QueScript", "stopped que '" + que.queName + "'");
+						}
+					}				
+				}
+			}
+
 			myScript.setup(globalExprEnvironment);
 			
 			Debugger.info("QueScript", "loaded " +_filepath + " with " + myScript.getChildren().size() + " que's");
@@ -287,30 +314,6 @@ public class QSManager implements OutputInterface{
 			return;
 		}
 		
-		// checking for a <stop> node to stop all ques still playing
-		for(Cmnd q: myScript.getStops()){
-			CmndInternal stop = (CmndInternal) q;
-			// all ques still playing need to be stopped:
-			for(Iterator<Cmnd> e = myScript.getQues().iterator(); e.hasNext();){
-				Cmnd cmd = e.next();
-				CmndQue que = (CmndQue)cmd;
-				if(que.isPlaying){
-					if(stop.hasName()){
-						// in this case we stop the indicated que:
-						if(que.queName.equals(stop.getName())){
-							que.clear();
-							e.remove();
-							Debugger.info("QueScript", "stopped que '" +que.queName + "'");
-						}
-					} else {
-						que.clear();
-						e.remove();
-						Debugger.info("QueScript", "stopped que '" + que.queName + "'");
-					}
-				}				
-			}
-		}
-
 
 		// checking for a <play> node to play all indicated ques
 		for(Cmnd q: myScript.getPlays()){
